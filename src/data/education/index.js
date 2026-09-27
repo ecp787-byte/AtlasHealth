@@ -16,6 +16,9 @@ import howClaimsWork from './articles/how-health-insurance-claims-work.js';
 import whatIsAnEob from './articles/what-is-an-eob.js';
 import howToChooseAPlan from './articles/how-to-choose-a-health-insurance-plan.js';
 import tenQuestions from './articles/10-questions-before-buying-health-insurance.js';
+import coverageGuideIndividuals from './articles/coverage-guide-individuals-and-families.js';
+import coverageGuideSelfEmployed from './articles/coverage-guide-self-employed.js';
+import coverageGuideBusiness from './articles/coverage-guide-business-and-group-benefits.js';
 
 export const ARTICLES = [
   howHealthInsuranceWorks,
@@ -33,6 +36,9 @@ export const ARTICLES = [
   whatIsAnEob,
   howToChooseAPlan,
   tenQuestions,
+  coverageGuideIndividuals,
+  coverageGuideSelfEmployed,
+  coverageGuideBusiness,
 ];
 
 export const ARTICLES_BY_SLUG = Object.fromEntries(ARTICLES.map((a) => [a.slug, a]));
@@ -84,6 +90,13 @@ export const CATEGORIES = [
     description: 'Claims, EOBs, and making sense of coverage after enrollment.',
     accent: 'duo',
     icon: 'i-health',
+  },
+  {
+    key: 'guides',
+    label: 'Coverage Guides',
+    description: 'What to look out for when you\'re shopping — by individuals & families, self-employed, and business.',
+    accent: 'guide',
+    icon: 'i-people',
   },
 ];
 

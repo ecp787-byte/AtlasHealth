@@ -124,6 +124,10 @@ export default {
       type: 'callout',
       text: "None of these three options is universally \"better.\" The right choice depends on your specific circumstances — whether your employer offers affordable coverage, your household income relative to the federal poverty level, your expected health needs, and your budget. Review the plan's Summary of Benefits and Coverage and verify provider participation directly with the insurer before enrolling in any plan. For a structured way to compare specific plans once you've narrowed down your options, see How to Choose a Health Insurance Plan Without Looking at Premium Alone.",
     },
+    {
+      type: 'p',
+      text: 'How this plays out looks a little different depending on who you are shopping for. If you\'re comparing coverage for yourself or a household, see our [individual and family coverage guide](coverage-guide-individuals-and-families) for the key points to check. If you\'re self-employed and weighing Marketplace coverage against other options, our [self-employed coverage guide](coverage-guide-self-employed) covers subsidy estimating, HSA pairing, and the self-employed tax deduction specifically.',
+    },
     { type: 'h2', text: 'Frequently asked questions' },
   ],
   faq: [
@@ -157,6 +161,8 @@ export default {
     { slug: 'marketplace-health-insurance-2026-changes', label: 'Marketplace Health Insurance in 2026: What Changed and Why It Matters' },
     { slug: 'health-insurance-terms-glossary', label: 'Health Insurance Terms Explained' },
     { slug: 'how-health-insurance-works', label: 'Health Insurance 101: How Health Insurance Actually Works' },
+    { slug: 'coverage-guide-self-employed', label: 'Self-Employed Coverage: What to Look For' },
+    { slug: 'coverage-guide-individuals-and-families', label: 'Individual & Family Coverage: What to Look For' },
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing' },
   image: {

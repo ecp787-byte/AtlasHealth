@@ -158,6 +158,10 @@ export default {
       type: 'p',
       text: 'Understanding what an HSA is — and isn\'t — matters most when you\'re comparing health plans during enrollment. If a plan is HSA-eligible, that\'s a feature worth weighing alongside the deductible, the network type, and the premium, not a replacement for understanding those other factors.',
     },
+    {
+      type: 'p',
+      text: 'HSAs come up especially often for people managing variable income — see our [self-employed coverage guide](coverage-guide-self-employed) for how pairing an HDHP with an HSA fits into that decision alongside estimating income for subsidies.',
+    },
   ],
   faq: [
     {
@@ -190,6 +194,7 @@ export default {
     { slug: 'what-is-a-health-insurance-deductible', label: 'What Is a Health Insurance Deductible?' },
     { slug: 'ppo-vs-hmo-vs-epo', label: 'PPO vs. HMO vs. EPO: Which Health Insurance Network Is Right for You?' },
     { slug: 'what-is-maximum-out-of-pocket', label: 'What Does Maximum Out-of-Pocket Mean?' },
+    { slug: 'coverage-guide-self-employed', label: 'Self-Employed Coverage: What to Look For' },
   ],
   cta: { label: 'Find Your Coverage', href: '/otp-landing' },
   image: {

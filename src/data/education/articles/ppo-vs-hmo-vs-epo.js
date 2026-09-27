@@ -118,6 +118,10 @@ export default {
       type: 'p',
       text: 'If you are also weighing a high-deductible plan paired with a health savings account, note that HSA eligibility depends on the plan\'s deductible and out-of-pocket structure meeting IRS requirements, not on whether the plan is a PPO, HMO, or EPO — an HSA-eligible high-deductible health plan can come in any of these network types.',
     },
+    {
+      type: 'p',
+      text: 'Network type matters differently depending on who is shopping. If you are comparing plans for yourself or your household, see our [individual and family coverage guide](coverage-guide-individuals-and-families). If you are choosing a network for a team spread across multiple locations, our [business and group benefits guide](coverage-guide-business-and-group-benefits) covers what to check for network breadth specifically.',
+    },
   ],
   faq: [
     {
@@ -150,6 +154,8 @@ export default {
     { slug: 'health-insurance-terms-glossary', label: 'Health Insurance Terms Explained' },
     { slug: 'what-is-an-hsa', label: 'What Is an HSA? How Health Savings Accounts Work' },
     { slug: 'how-to-choose-a-health-insurance-plan', label: 'How to Choose a Health Insurance Plan Without Looking at Premium Alone' },
+    { slug: 'coverage-guide-individuals-and-families', label: 'Individual & Family Coverage: What to Look For' },
+    { slug: 'coverage-guide-business-and-group-benefits', label: 'Business & Group Benefits: What to Look For' },
   ],
   cta: { label: 'Explore Health Plans', href: '/otp-landing' },
   image: {

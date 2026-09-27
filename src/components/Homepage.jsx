@@ -23,19 +23,24 @@ import heroHikerValley from '../assets/hero-hiker-valley.jpg';
 // sections ("Different paths" photo cards, "How Atlas Health works" steps)
 // replace the old icon-grid and photo+list sections that covered similar
 // ground with a heavier footprint.
+// Each links straight to its audience's Education Center guide (rather than
+// scrolling to the homepage's own "Different paths" cards) so a visitor who
+// clicks "Coverage" in the header gets the key points to look out for before
+// they're asked to start the funnel - the guides themselves carry the CTAs
+// into /otp-landing once they've had that context.
 const COVERAGE_LINKS = [
   {
-    href: '#coverage-individual',
+    href: '/learn/coverage-guide-individuals-and-families',
     label: 'Individuals & Families',
     body: 'Coverage for you and the people who matter most.',
   },
   {
-    href: '#coverage-self-employed',
+    href: '/learn/coverage-guide-self-employed',
     label: 'Self-Employed',
     body: 'Health insurance built for your independence.',
   },
   {
-    href: '#coverage-business',
+    href: '/learn/coverage-guide-business-and-group-benefits',
     label: 'Business',
     body: 'Group plans to support your team and its growth.',
   },

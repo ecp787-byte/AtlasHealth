@@ -129,7 +129,7 @@ export default {
     },
     {
       type: 'p',
-      text: 'Understanding your options before choosing your coverage means looking past the headline deductible number to how the whole plan fits together — the premium, the deductible, the out-of-pocket maximum, and how the plan handles the specific services you’re most likely to use.',
+      text: 'Understanding your options before choosing your coverage means looking past the headline deductible number to how the whole plan fits together — the premium, the deductible, the out-of-pocket maximum, and how the plan handles the specific services you’re most likely to use. For a fuller checklist of what to weigh by situation, see our [individual and family](coverage-guide-individuals-and-families), [self-employed](coverage-guide-self-employed), and [business and group benefits](coverage-guide-business-and-group-benefits) coverage guides.',
     },
   ],
   faq: [
@@ -174,6 +174,10 @@ export default {
     {
       slug: 'what-is-an-hsa',
       label: 'What Is an HSA? How Health Savings Accounts Work',
+    },
+    {
+      slug: 'coverage-guide-individuals-and-families',
+      label: 'Individual & Family Coverage: What to Look For',
     },
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing' },

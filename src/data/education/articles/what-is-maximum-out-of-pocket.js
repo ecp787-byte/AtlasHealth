@@ -116,6 +116,10 @@ export default {
       text:
         'For a full walkthrough of the other terms that show up alongside maximum out-of-pocket — premium, deductible, copay, coinsurance, allowed amount, and more — see our health insurance terms glossary.',
     },
+    {
+      type: 'p',
+      text: 'If you\'re reviewing this figure from the employee side of a group plan rather than shopping individually, our [business and group benefits guide](coverage-guide-business-and-group-benefits) covers why the out-of-pocket maximum matters as much as the premium when evaluating coverage for a team.',
+    },
   ],
   faq: [
     {
@@ -154,6 +158,7 @@ export default {
     { slug: 'copay-vs-coinsurance', label: 'Copay vs. Coinsurance: What’s the Difference?' },
     { slug: 'health-insurance-terms-glossary', label: 'Health Insurance Terms Explained' },
     { slug: 'what-is-an-hsa', label: 'What Is an HSA? How Health Savings Accounts Work' },
+    { slug: 'coverage-guide-business-and-group-benefits', label: 'Business & Group Benefits: What to Look For' },
   ],
   cta: { label: 'Find Your Coverage', href: '/otp-landing' },
   image: {

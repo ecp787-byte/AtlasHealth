@@ -270,6 +270,10 @@ export default {
       type: 'callout',
       text: 'This glossary is for general education and is not personalized insurance, legal, or tax advice. Terms, coverage rules, and dollar amounts vary by state, insurer, and specific plan — always confirm details in your plan\'s Summary of Benefits and Coverage or directly with your insurer.',
     },
+    {
+      type: 'p',
+      text: 'Once the vocabulary makes sense, the next step is applying it to your own situation. See our [individual and family](coverage-guide-individuals-and-families), [self-employed](coverage-guide-self-employed), and [business and group benefits](coverage-guide-business-and-group-benefits) guides for the specific points to look out for when you\'re actually comparing plans.',
+    },
   ],
   faq: [
     {
@@ -305,6 +309,9 @@ export default {
     { slug: 'what-is-first-dollar-coverage', label: 'What Is First-Dollar Coverage?' },
     { slug: 'what-is-an-eob', label: 'What Is an Explanation of Benefits (EOB)?' },
     { slug: 'how-health-insurance-claims-work', label: "How Health Insurance Claims Work: From the Doctor's Office to Your EOB" },
+    { slug: 'coverage-guide-individuals-and-families', label: 'Individual & Family Coverage: What to Look For' },
+    { slug: 'coverage-guide-self-employed', label: 'Self-Employed Coverage: What to Look For' },
+    { slug: 'coverage-guide-business-and-group-benefits', label: 'Business & Group Benefits: What to Look For' },
   ],
   cta: { label: 'Understand Your Options', href: '/otp-landing' },
   image: {
