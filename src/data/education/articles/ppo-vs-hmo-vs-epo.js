@@ -159,8 +159,42 @@ export default {
   ],
   cta: { label: 'Explore Health Plans', href: '/otp-landing' },
   image: {
-    suggestion:
-      'A clean side-by-side diagram or icon set showing three simple network maps (PPO with wider connecting lines including an outside node, HMO centered on a PCP hub, EPO as a closed network) — modern, minimal, editorial style, not a stock photo of a doctor.',
-    alt: 'Diagram comparing PPO, HMO, and EPO health insurance network structures',
+    diagram: {
+      type: 'CompareGrid',
+      props: {
+        title: 'PPO vs. HMO vs. EPO, at a Glance',
+        columns: [
+          {
+            label: 'PPO',
+            tag: 'Most flexible',
+            facts: [
+              { label: 'Referrals', value: 'Usually not required' },
+              { label: 'Out-of-network', value: 'Often covered, at higher cost' },
+              { label: 'Premium tendency', value: 'Often higher' },
+            ],
+          },
+          {
+            label: 'HMO',
+            tag: 'PCP-coordinated',
+            facts: [
+              { label: 'Referrals', value: 'Usually required' },
+              { label: 'Out-of-network', value: 'Generally not, except emergencies' },
+              { label: 'Premium tendency', value: 'Often lower' },
+            ],
+          },
+          {
+            label: 'EPO',
+            tag: 'In between',
+            facts: [
+              { label: 'Referrals', value: 'Usually not required' },
+              { label: 'Out-of-network', value: 'Generally not, except emergencies' },
+              { label: 'Premium tendency', value: 'Often in between' },
+            ],
+          },
+        ],
+        footnote: 'General tendencies, not guarantees — compare actual premiums, deductibles, and provider networks for the specific plans you\'re considering.',
+      },
+    },
+    alt: 'Three-column comparison of PPO, HMO, and EPO referral rules, out-of-network coverage, and typical premium tendency.',
   },
 };

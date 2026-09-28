@@ -2,10 +2,9 @@ import { useMemo, useState } from 'react';
 import { zipToState } from '../lib/zipToState.js';
 import { scoreLead } from '../lib/leadScoring.js';
 import { getEligibilityRoute } from '../lib/leadRouting.js';
-import { isDuringBusinessHours } from '../lib/businessHours.js';
 import { trackEvent, EVENTS } from '../lib/tracking.js';
 import { submitLead } from '../lib/api.js';
-import { AGENT_PHONE_TEL, AGENT_PHONE_DISPLAY } from '../data/legalContent.js';
+import { AGENT_SMS_HREF, AGENT_PHONE_DISPLAY } from '../data/legalContent.js';
 import { CONSENT_COPY } from './quiz/StepConsent.jsx';
 import { getTrustedFormCertUrl } from '../lib/trustedForm.js';
 
@@ -38,7 +37,6 @@ export default function ResultsPage({ answers, attribution }) {
   const state = useMemo(() => zipToState(answers.zip), [answers.zip]);
   const { score, tier } = useMemo(() => scoreLead(answers), [answers]);
   const routing = useMemo(() => getEligibilityRoute(answers), [answers]);
-  const duringHours = isDuringBusinessHours();
   const firstName = answers.contact?.firstName || 'there';
 
   // Submit once, on first render of the results page. Fire-and-forget from
@@ -107,55 +105,49 @@ export default function ResultsPage({ answers, attribution }) {
         </div>
       </div>
 
-      {duringHours ? (
-        <a className="btn btn-primary btn-block results-cta" href={AGENT_PHONE_TEL}>
-          Speak With an Agent Now — {AGENT_PHONE_DISPLAY}
-        </a>
-      ) : (
-        <div className="results-schedule">
-          <p className="results-schedule-label">
-            Our licensed agents are offline right now — schedule a callback:
+      <div className="results-schedule">
+        <p className="results-schedule-label">
+          Pick a time that works best for you:
+        </p>
+        {!scheduled ? (
+          <>
+            <input
+              type="date"
+              className="quiz-input"
+              value={schedDate}
+              onChange={(e) => setSchedDate(e.target.value)}
+            />
+            <div className="results-slots">
+              {TIME_SLOTS.map((slot) => (
+                <button
+                  key={slot}
+                  type="button"
+                  className={`quiz-card quiz-card-compact${schedSlot === slot ? ' is-selected' : ''}`}
+                  onClick={() => setSchedSlot(slot)}
+                >
+                  {slot}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary btn-block results-cta"
+              disabled={!schedDate}
+              onClick={confirmSchedule}
+            >
+              Schedule My Coverage Review
+            </button>
+          </>
+        ) : (
+          <p className="results-scheduled-confirm">
+            You're booked for {schedDate} at {schedSlot}. A licensed agent will call{' '}
+            {answers.phone ? `(${answers.phone.slice(0, 3)}) ${answers.phone.slice(3, 6)}-${answers.phone.slice(6)}` : 'you'} then.
           </p>
-          {!scheduled ? (
-            <>
-              <input
-                type="date"
-                className="quiz-input"
-                value={schedDate}
-                onChange={(e) => setSchedDate(e.target.value)}
-              />
-              <div className="results-slots">
-                {TIME_SLOTS.map((slot) => (
-                  <button
-                    key={slot}
-                    type="button"
-                    className={`quiz-card quiz-card-compact${schedSlot === slot ? ' is-selected' : ''}`}
-                    onClick={() => setSchedSlot(slot)}
-                  >
-                    {slot}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="btn btn-primary btn-block results-cta"
-                disabled={!schedDate}
-                onClick={confirmSchedule}
-              >
-                Schedule My Coverage Review
-              </button>
-            </>
-          ) : (
-            <p className="results-scheduled-confirm">
-              You're booked for {schedDate} at {schedSlot}. A licensed agent will call{' '}
-              {answers.phone ? `(${answers.phone.slice(0, 3)}) ${answers.phone.slice(3, 6)}-${answers.phone.slice(6)}` : 'you'} then.
-            </p>
-          )}
-        </div>
-      )}
+        )}
+      </div>
 
-      <a className="btn btn-ghost btn-block results-secondary" href={AGENT_PHONE_TEL}>
-        Speak With a Licensed Agent — {AGENT_PHONE_DISPLAY}
+      <a className="btn btn-ghost btn-block results-secondary" href={AGENT_SMS_HREF}>
+        Text an Agent Now — {AGENT_PHONE_DISPLAY}
       </a>
 
       <p className="results-footnote">

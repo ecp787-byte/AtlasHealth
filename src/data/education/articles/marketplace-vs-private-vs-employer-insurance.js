@@ -166,8 +166,43 @@ export default {
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing' },
   image: {
-    suggestion: 'A clean three-column visual comparing a briefcase (employer), a compass/laptop (Marketplace), and a handshake/document (private individual) icon set, in the brand palette.',
-    alt: 'Illustration comparing employer, Marketplace, and private individual health insurance paths',
+    diagram: {
+      type: 'CompareGrid',
+      props: {
+        title: 'Three Paths to Coverage, at a Glance',
+        columns: [
+          {
+            label: 'Marketplace',
+            tag: 'Subsidy possible',
+            facts: [
+              { label: 'Subsidy', value: 'Income-based; 400% FPL cliff returned for 2026' },
+              { label: 'Underwriting', value: 'Guaranteed issue' },
+              { label: 'Portability', value: 'Stays with you' },
+            ],
+          },
+          {
+            label: 'Employer-Sponsored',
+            tag: 'Group-rated',
+            facts: [
+              { label: 'Subsidy', value: 'Indirect — employer contribution is tax-free' },
+              { label: 'Underwriting', value: 'No individual underwriting' },
+              { label: 'Portability', value: 'Tied to your job; COBRA may apply' },
+            ],
+          },
+          {
+            label: 'Private / Off-Marketplace',
+            tag: 'Full price',
+            facts: [
+              { label: 'Subsidy', value: 'None' },
+              { label: 'Underwriting', value: 'Guaranteed issue if ACA-compliant' },
+              { label: 'Portability', value: 'Stays with you' },
+            ],
+          },
+        ],
+        footnote: 'None of the three is universally "better" — the right one depends on what your employer offers, your household income, and your health needs.',
+      },
+    },
+    alt: 'Three-column comparison of Marketplace, employer-sponsored, and private individual health insurance.',
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },

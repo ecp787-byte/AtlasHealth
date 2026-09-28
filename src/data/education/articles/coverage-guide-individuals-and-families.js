@@ -1,3 +1,8 @@
+// Same photo already sourced/validated for the homepage's "Individual &
+// Family" path card - reused here rather than sourcing a new one, so the
+// two touchpoints stay visually consistent.
+import heroEmbrace from '../../../assets/hero-embrace-panel.jpg';
+
 export default {
   slug: 'coverage-guide-individuals-and-families',
   category: 'guides',
@@ -158,8 +163,8 @@ export default {
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing?start=1' },
   image: {
-    suggestion:
-      'A warm, natural photo of a parent and one or two kids in an everyday moment (kitchen, backyard, walking) — avoid stock "doctor with stethoscope" imagery; this article is about choosing coverage, not visiting one.',
+    photo: heroEmbrace,
+    photoPosition: '42% 40%',
     alt: 'A parent and child in an everyday home setting, representing individual and family health coverage.',
   },
   sources: [

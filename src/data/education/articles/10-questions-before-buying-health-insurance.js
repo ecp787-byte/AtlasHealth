@@ -141,9 +141,26 @@ export default {
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing' },
   image: {
-    suggestion:
-      'A clean checklist-style graphic showing a numbered list of 10 short icons (doctor, pill bottle, dollar sign, shield, calendar, etc.) in a modern editorial style — not a stock photo of paperwork or a doctor\'s office.',
-    alt: 'Checklist icon graphic representing 10 questions to ask before buying health insurance',
+    diagram: {
+      type: 'IconCluster',
+      props: {
+        title: 'The 10 Questions, at a Glance',
+        items: [
+          { n: 1, label: 'Are my doctors in network?' },
+          { n: 2, label: 'Are my prescriptions covered?' },
+          { n: 3, label: 'What is my deductible?' },
+          { n: 4, label: 'What is my max out-of-pocket?' },
+          { n: 5, label: 'What do primary care visits cost?' },
+          { n: 6, label: 'What do specialist visits cost?' },
+          { n: 7, label: 'Is out-of-network care covered?' },
+          { n: 8, label: 'Do I need referrals?' },
+          { n: 9, label: 'What happens if I travel?' },
+          { n: 10, label: 'What needs prior authorization?' },
+        ],
+        footnote: 'Find the answers in the plan\'s Summary of Benefits and Coverage, its provider directory and formulary, or by calling the insurer directly.',
+      },
+    },
+    alt: 'Numbered grid of the 10 questions to ask before buying health insurance.',
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },

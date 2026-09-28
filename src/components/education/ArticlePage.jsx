@@ -1,7 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
 import ArticleSection from './ArticleSection.jsx';
+import BeforeAfterChart from './BeforeAfterChart.jsx';
+import FlowSteps from './FlowSteps.jsx';
+import CompareTwo from './CompareTwo.jsx';
+import CompareGrid from './CompareGrid.jsx';
+import CostMeter from './CostMeter.jsx';
+import PlanCostBarChart from './PlanCostBarChart.jsx';
+import IconCluster from './IconCluster.jsx';
+import AnnotatedDoc from './AnnotatedDoc.jsx';
 import ComplianceFooter from '../ComplianceFooter.jsx';
 import { ARTICLES_BY_SLUG, getCategory } from '../../data/education/index.js';
+
+// A registry rather than importing each component directly into every
+// article data file - keeps the data files as plain data (just a `type`
+// string + props) instead of mixing JSX component references into them.
+const DIAGRAM_COMPONENTS = {
+  FlowSteps,
+  CompareTwo,
+  CompareGrid,
+  CostMeter,
+  PlanCostBarChart,
+  IconCluster,
+  AnnotatedDoc,
+};
 
 // Sets document.title + the meta description tag, and injects FAQPage
 // JSON-LD structured data - the SEO wins available to a client-rendered
@@ -174,9 +195,33 @@ export default function ArticlePage({ article }) {
             {article.updated && <span>Updated {article.updated}</span>}
           </div>
 
-          <div className="article-image-placeholder" role="img" aria-label={article.image?.alt}>
-            <span className="article-image-caption">{article.image?.suggestion}</span>
-          </div>
+          {article.image?.photo ? (
+            <img
+              className="article-photo"
+              src={article.image.photo}
+              alt={article.image.alt || ''}
+              style={article.image.photoPosition ? { objectPosition: article.image.photoPosition } : undefined}
+            />
+          ) : article.image?.chart ? (
+            <BeforeAfterChart {...article.image.chart} />
+          ) : article.image?.diagram ? (
+            (() => {
+              const Diagram = DIAGRAM_COMPONENTS[article.image.diagram.type];
+              return Diagram ? <Diagram {...article.image.diagram.props} /> : null;
+            })()
+          ) : (
+            <div
+              className={`article-image-placeholder${category ? ` cat-tint-${category.accent}` : ''}`}
+              role="img"
+              aria-label={article.image?.alt || ''}
+            >
+              {category?.icon && (
+                <svg className="icon article-image-placeholder-icon" aria-hidden="true">
+                  <use href={`#${category.icon}`} />
+                </svg>
+              )}
+            </div>
+          )}
 
           <div className="article-body">
             {sections.map((section, i) => (

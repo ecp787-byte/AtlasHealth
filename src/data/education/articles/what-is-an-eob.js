@@ -160,7 +160,19 @@ export default {
   ],
   cta: { label: 'Talk With a Coverage Guide', href: '/otp-landing' },
   image: {
-    suggestion: 'A clean, annotated mock-up of an Explanation of Benefits document with callout labels pointing to key fields — billed amount, allowed amount, plan paid, and patient responsibility — in the brand\'s color palette.',
-    alt: 'Annotated example of an Explanation of Benefits showing billed amount, allowed amount, plan paid, and patient responsibility',
+    diagram: {
+      type: 'AnnotatedDoc',
+      props: {
+        title: 'How to Read an EOB',
+        columns: ['Service', 'Billed', 'Allowed', 'Plan Paid', 'Your Responsibility'],
+        rows: [
+          ['Office visit, established patient', '$220', '$140', '$110', '$30 (copay)'],
+          ['Basic metabolic panel (lab work)', '$180', '$45', '$45', '$0'],
+          ['X-ray, single view', '$310', '$150', '$0', '$150 (to deductible)'],
+        ],
+        footnote: 'Fictional example, for illustration only. "Your Responsibility" is the insurer\'s estimate — always compare it to the actual bill from your provider before paying.',
+      },
+    },
+    alt: 'Annotated example of an Explanation of Benefits showing billed amount, allowed amount, plan paid, and patient responsibility.',
   },
 };

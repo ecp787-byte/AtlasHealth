@@ -160,8 +160,34 @@ export default {
   ],
   cta: { label: 'Get Help Navigating Your Coverage', href: '/otp-landing' },
   image: {
-    suggestion:
-      'A clean split-graphic showing a doctor\'s office or hospital icon on one side labeled "In-Network" with a checkmark and lower cost indicator, and the same icon on the other side labeled "Out-of-Network" with a caution indicator — modern, flat illustration style consistent with the brand, no stock photo of a stethoscope.',
-    alt: 'Illustration comparing an in-network provider with lower cost-sharing against an out-of-network provider with higher, less predictable costs.',
+    diagram: {
+      type: 'CompareTwo',
+      props: {
+        title: 'Why the Network Matters: Two Hypothetical Examples',
+        left: {
+          label: 'In-Network',
+          tag: 'Negotiated rate',
+          stats: [
+            { label: 'Provider\'s billed charge', value: '$300' },
+            { label: 'Negotiated (allowed) rate', value: '$150' },
+            { label: 'Balance billing risk', value: 'None' },
+          ],
+          note: 'Cost-sharing is calculated on the $150 negotiated rate, not the $300 list price.',
+        },
+        right: {
+          label: 'Out-of-Network',
+          tag: 'No contract',
+          stats: [
+            { label: 'Provider bills', value: '$1,000' },
+            { label: 'Insurer\'s allowed amount', value: '$400' },
+            { label: 'Insurer pays', value: '$250' },
+            { label: 'Balance bill to you', value: '$750' },
+          ],
+          note: 'With no negotiated rate, the provider can bill you the difference between their charge and what insurance paid.',
+        },
+        footnote: 'Hypothetical, simplified illustrations. Actual negotiated rates, allowed amounts, and balance-billing rules vary by insurer, provider, plan, service, and state.',
+      },
+    },
+    alt: 'Comparison of an in-network negotiated rate against an out-of-network balance-billing example.',
   },
 };

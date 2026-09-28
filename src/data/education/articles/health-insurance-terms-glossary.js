@@ -315,8 +315,20 @@ export default {
   ],
   cta: { label: 'Understand Your Options', href: '/otp-landing' },
   image: {
-    suggestion: 'A clean, modern flat-lay or infographic-style graphic showing an insurance card, an EOB document, and a pharmacy label arranged together, in Atlas Health\'s brand colors — evokes "the paperwork you actually need to understand."',
-    alt: 'Health insurance card, Explanation of Benefits document, and prescription label representing common health insurance terms',
+    diagram: {
+      type: 'IconCluster',
+      props: {
+        title: 'Four Groups of Terms Worth Knowing',
+        items: [
+          { icon: 'i-doc', label: 'Cost-Sharing', detail: 'Premium, deductible, copay, coinsurance, out-of-pocket max, allowed amount.' },
+          { icon: 'i-group', label: 'Network', detail: 'Provider network, in/out-of-network, PCP, specialist, referrals, prior authorization.' },
+          { icon: 'i-health', label: 'Claims & Billing', detail: 'Claim, EOB, balance billing, preventive care.' },
+          { icon: 'i-shield', label: 'Plan Design', detail: 'First-dollar benefits, indemnity benefits.' },
+        ],
+        footnote: 'Jump to any section header above for the full definitions and examples.',
+      },
+    },
+    alt: 'Four grouped categories of health insurance terms: cost-sharing, network, claims and billing, and plan design.',
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },

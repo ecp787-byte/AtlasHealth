@@ -1,3 +1,8 @@
+// Same photo already sourced/validated for the homepage's "Self-Employed"
+// path card - reused here rather than sourcing a new one, so the two
+// touchpoints stay visually consistent.
+import floristShop from '../../../assets/florist-shop.jpg';
+
 export default {
   slug: 'coverage-guide-self-employed',
   category: 'guides',
@@ -122,8 +127,8 @@ export default {
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing?start=1' },
   image: {
-    suggestion:
-      'A candid photo of someone working independently — at a laptop in a home office, a small studio, or a workshop — avoid generic "freelancer at a coffee shop" stock cliché if possible; something that reads as a real small business or trade.',
+    photo: floristShop,
+    photoPosition: '50% 35%',
     alt: 'A self-employed person working independently, representing self-employed health coverage.',
   },
   sources: [

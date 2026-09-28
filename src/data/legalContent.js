@@ -10,10 +10,17 @@
 
 export const CONTACT_EMAIL = 'info@veritassolutions.io';
 
-// Used for the "Speak With an Agent" CTAs on the results page. Kept as a
-// single tel: value + a matching display string so the two never drift.
+// Used for the agent-contact CTA on the results page. Kept as a single
+// tel: value + a matching display string so the two never drift.
 export const AGENT_PHONE_TEL = 'tel:+13024055243';
 export const AGENT_PHONE_DISPLAY = '(302) 405-5243';
+
+// The results page's primary agent-contact CTA opens a text thread (not a
+// call) - the sms: URI scheme opens the visitor's own messaging app with
+// this pre-filled body, same phone number as AGENT_PHONE_TEL above.
+export const AGENT_SMS_HREF = `sms:+13024055243?body=${encodeURIComponent(
+  "Hi! I just finished my coverage assessment on Atlas Health and I'd like to talk to an agent."
+)}`;
 
 export const PRIVACY_POLICY = {
   title: 'Privacy Policy',

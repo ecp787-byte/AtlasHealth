@@ -29,6 +29,8 @@ input,select{font-family:inherit;font-size:16px;}
 
 .icon{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block;}
 
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
 .text-gradient{background:var(--btn-gradient);-webkit-background-clip:text;background-clip:text;color:transparent;}
 
 /* Category color system - a small set of tints built entirely from the
@@ -738,13 +740,28 @@ a:hover .cta-arrow, button:hover .cta-arrow{transform:translateX(4px);}
 .article-main{min-width:0;}
 @media (max-width:900px){
   .article-layout{grid-template-columns:1fr;gap:28px;}
-  .article-sidebar{position:static;flex-direction:row;flex-wrap:wrap;}
+  .article-sidebar{position:static;}
+}
+/* Tablet width: sidebar goes above the article as two boxes side by side.
+   flex-basis is a WIDTH here because the row is still flex-direction:row. */
+@media (min-width:521px) and (max-width:900px){
+  /* align-items:flex-start overrides flexbox's default "stretch" - without
+     it, the short CTA card is forced to match the tall TOC list's height
+     (the same empty-space bug as the phone breakpoint, one flex axis over). */
+  .article-sidebar{flex-direction:row;flex-wrap:wrap;align-items:flex-start;}
   .article-toc{flex:1 1 220px;}
   .article-toc ul{max-height:240px;overflow-y:auto;}
   .article-sidebar-cta{flex:1 1 220px;}
 }
+/* Phone width: single stacked column. Deliberately NOT reusing the 220px
+   flex-basis from the row layout above - flex-basis tracks the main axis, so
+   the same rule in a column container would force a 220px-tall CTA card
+   (empty space padded out below the button) instead of a 220px-wide one. */
 @media (max-width:520px){
   .article-sidebar{flex-direction:column;}
+  .article-toc,
+  .article-sidebar-cta{flex:none;}
+  .article-toc ul{max-height:none;overflow-y:visible;}
 }
 
 /* Article page */
@@ -756,11 +773,145 @@ a:hover .cta-arrow, button:hover .cta-arrow{transform:translateX(4px);}
 .article-title{font-family:var(--font-display);font-size:clamp(26px,4.5vw,38px);line-height:1.2;margin-bottom:14px;}
 .article-dek{font-size:16.5px;line-height:1.6;color:var(--text-muted);margin-bottom:16px;}
 .article-meta{display:flex;gap:14px;font-size:12.5px;color:var(--text-muted);margin-bottom:26px;}
+/* Shown only for articles with no real photo or chart yet - a clean, on-
+   brand tinted panel with the article's own category icon, never raw
+   production notes (article.image.suggestion is design-brief copy for
+   whoever sources the real asset, not visitor-facing content, so it's read
+   only as the aria-label below, never rendered as visible text). */
 .article-image-placeholder{
-  border:1px dashed var(--line-strong);border-radius:var(--radius-m);background:var(--bg);
-  min-height:120px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;margin-bottom:32px;
+  border-radius:var(--radius-m);background:var(--tint-soft, var(--surface-2));
+  min-height:180px;display:flex;align-items:center;justify-content:center;margin-bottom:32px;
 }
-.article-image-caption{font-size:12.5px;font-style:italic;color:var(--text-muted);max-width:440px;}
+.article-image-placeholder-icon{
+  width:56px;height:56px;padding:16px;border-radius:50%;
+  background:var(--tint-grad, var(--btn-gradient));stroke:#fff;box-shadow:var(--shadow-s, 0 4px 14px rgba(0,0,0,0.12));
+}
+.article-photo{
+  width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radius-m);margin-bottom:32px;display:block;
+}
+
+/* Article chart (BeforeAfterChart.jsx) - a small inline SVG, no chart
+   library. SVG text elements are styled here (not inline) so they inherit
+   the article's own type family and stay in one place to tune. */
+.article-chart{border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);padding:18px 18px 10px;margin-bottom:32px;}
+.article-chart-title{font-size:12.5px;font-weight:700;letter-spacing:0.01em;color:var(--text);margin:0 0 6px;}
+.article-chart-svg{width:100%;height:auto;display:block;overflow:visible;}
+.article-chart-legend-text{font-size:11px;fill:var(--text-muted);font-family:var(--font-sans);}
+.article-chart-gridline{stroke:var(--line);stroke-width:1;}
+.article-chart-row-label{font-size:12.5px;fill:var(--text);font-weight:600;font-family:var(--font-sans);}
+.article-chart-connector{stroke:var(--line-strong);stroke-width:2;stroke-linecap:round;}
+.article-chart-value{font-size:11.5px;fill:var(--text);font-weight:700;font-family:var(--font-sans);}
+.article-chart-value-muted{fill:var(--text-muted);font-weight:600;}
+.article-chart-delta{font-size:11px;fill:var(--text-muted);font-family:var(--font-sans);}
+.article-chart-axis{stroke:var(--line-strong);stroke-width:1;}
+.article-chart-tick{font-size:10.5px;fill:var(--text-muted);font-family:var(--font-sans);}
+.article-chart-footnote{font-size:10px;fill:var(--text-muted);font-family:var(--font-sans);}
+
+/* ============================================================================
+   ARTICLE DIAGRAMS — a small set of reusable, dependency-free components
+   (FlowSteps, CompareTwo, CompareGrid, CostMeter, IconCluster, AnnotatedDoc)
+   that replace the generic icon placeholder with real, content-accurate
+   visuals for articles whose numbers don't fit BeforeAfterChart's
+   before/after shape. Shared wrapper styling (.article-diagram) matches
+   .article-chart's card treatment so every diagram type - SVG chart or
+   plain HTML - reads as one consistent family on the page.
+   ========================================================================== */
+.article-diagram{border:1px solid var(--line);border-radius:var(--radius-m);background:var(--surface);padding:18px;margin-bottom:32px;}
+.diagram-footnote{font-size:11.5px;line-height:1.5;color:var(--text-muted);margin:14px 0 0;}
+.diagram-footnote-inset{padding:0 18px 6px;}
+
+/* --- FlowSteps: numbered process sequence -------------------------------- */
+.diagram-flow-list{display:flex;flex-direction:column;gap:2px;margin:14px 0 0;padding:0;list-style:none;}
+.diagram-flow-item{display:flex;flex-direction:column;align-items:stretch;}
+.diagram-flow-step{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);
+  border-radius:var(--radius-s);background:var(--bg);
+}
+.diagram-flow-num{
+  flex:none;width:30px;height:30px;border-radius:50%;background:var(--btn-gradient);color:var(--on-dark);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+}
+.diagram-flow-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.diagram-flow-label{font-size:14px;font-weight:700;color:var(--text);margin:0;}
+.diagram-flow-detail{font-size:12.5px;line-height:1.5;color:var(--text-muted);margin:0;}
+.diagram-flow-arrow{
+  flex:none;align-self:center;color:var(--accent);width:26px;height:26px;display:flex;align-items:center;
+  justify-content:center;transform:rotate(90deg);margin-block:2px;
+}
+.diagram-flow-arrow-icon{width:18px;height:18px;}
+
+/* --- CompareTwo: two-card identity comparison ---------------------------- */
+.diagram-compare2-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px;}
+.diagram-compare2-card{border:1px solid var(--line);border-radius:var(--radius-s);background:var(--bg);padding:16px 18px;}
+.diagram-compare2-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.diagram-compare2-label{font-size:14.5px;font-weight:700;color:var(--text);margin:0;}
+.diagram-compare2-tag{font-size:10.5px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 9px;border-radius:var(--radius-pill);}
+.diagram-compare2-stats{margin:0;}
+.diagram-compare2-stat{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);}
+.diagram-compare2-stat:last-child{border-bottom:none;}
+.diagram-compare2-stat dt{font-size:12.5px;color:var(--text-muted);margin:0;}
+.diagram-compare2-stat dd{font-size:13.5px;font-weight:700;color:var(--text);margin:0;text-align:right;}
+.diagram-compare2-note{font-size:12px;line-height:1.5;color:var(--text-muted);margin:10px 0 0;font-style:italic;}
+
+/* --- CompareGrid: N-column identity comparison --------------------------- */
+.diagram-grid-row{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px;}
+.diagram-grid-card{border:1px solid var(--line);border-radius:var(--radius-s);background:var(--bg);padding:16px 18px;}
+.diagram-grid-label{font-size:14.5px;font-weight:700;color:var(--text);margin:0 0 2px;}
+.diagram-grid-tag{font-size:12px;color:var(--text-muted);margin:0 0 10px;}
+.diagram-grid-facts{margin:0;padding:0;list-style:none;}
+.diagram-grid-facts li{display:flex;flex-direction:column;gap:1px;padding:7px 0;border-bottom:1px solid var(--line);}
+.diagram-grid-facts li:last-child{border-bottom:none;}
+.diagram-grid-fact-label{font-size:10.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--tint-fg, var(--accent));}
+.diagram-grid-fact-value{font-size:12.5px;line-height:1.45;color:var(--text);}
+
+/* --- CostMeter: threshold / fill bar -------------------------------------- */
+.diagram-meter-body{display:flex;flex-direction:column;gap:20px;margin-top:14px;}
+.diagram-meter-row{display:flex;flex-direction:column;gap:6px;}
+.diagram-meter-row-label{font-size:12.5px;font-weight:700;color:var(--text);margin:0;}
+.diagram-meter-track{display:flex;width:100%;height:38px;border-radius:var(--radius-s);overflow:hidden;border:1px solid var(--line);background:var(--bg);}
+.diagram-meter-seg{
+  display:flex;align-items:center;justify-content:center;min-width:0;position:relative;
+  border-right:2px solid var(--surface);
+}
+.diagram-meter-seg:last-child{border-right:none;}
+.diagram-meter-seg-a{background:var(--accent);}
+.diagram-meter-seg-b{background:var(--accent-2);}
+.diagram-meter-seg-label{
+  font-size:10.5px;font-weight:700;color:var(--on-dark);padding:0 8px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;
+}
+.diagram-meter-ticks{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--text-muted);}
+.diagram-meter-marker-text{font-size:10.5px;font-weight:700;color:var(--accent-2);text-align:center;}
+
+/* --- IconCluster: decorative numbered/iconed grid ------------------------- */
+.diagram-cluster-grid{display:grid;grid-template-columns:1fr;gap:14px;margin:14px 0 0;padding:0;list-style:none;}
+.diagram-cluster-compact .diagram-cluster-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+.diagram-cluster-item{display:flex;align-items:flex-start;gap:12px;}
+.diagram-cluster-compact .diagram-cluster-item{
+  flex-direction:column;align-items:flex-start;gap:8px;padding:12px;border:1px solid var(--line);
+  border-radius:var(--radius-s);background:var(--bg);
+}
+.diagram-cluster-badge{
+  flex:none;width:36px;height:36px;border-radius:50%;background:var(--btn-gradient);color:var(--on-dark);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+}
+.diagram-cluster-badge svg{width:18px;height:18px;stroke:var(--on-dark);fill:none;stroke-width:1.8;}
+.diagram-cluster-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.diagram-cluster-label{font-size:13px;font-weight:700;color:var(--text);margin:0;line-height:1.4;}
+.diagram-cluster-detail{font-size:12px;line-height:1.5;color:var(--text-muted);margin:0;}
+
+/* --- AnnotatedDoc: labeled document mock-up ------------------------------- */
+.diagram-doc-sheet{border:1px solid var(--line);border-radius:var(--radius-s);overflow:hidden;margin-top:14px;background:var(--bg);}
+.diagram-doc-sheet-head{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--accent-3-soft);display:flex;flex-direction:column;gap:2px;}
+.diagram-doc-sheet-eyebrow{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);}
+.diagram-doc-sheet-title{font-size:14.5px;font-weight:700;color:var(--text);}
+.diagram-doc-table-wrap{overflow-x:auto;}
+.diagram-doc-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:480px;}
+.diagram-doc-table th,.diagram-doc-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;}
+.diagram-doc-table thead th{background:var(--surface);font-size:10.5px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:var(--text-muted);}
+.diagram-doc-table tbody tr:last-child td{border-bottom:none;}
+.diagram-doc-cell-emphasis{background:var(--accent-soft);font-weight:700;color:var(--text);}
+
 .article-body{margin-bottom:8px;}
 .article-h2{font-size:22px;margin-top:36px;margin-bottom:14px;scroll-margin-top:24px;}
 .article-h3{font-size:17px;margin-top:26px;margin-bottom:10px;}
@@ -842,6 +993,20 @@ a:hover .cta-arrow, button:hover .cta-arrow{transform:translateX(4px);}
   .home-learn-teaser-layout{grid-template-columns:1.1fr 0.9fr;align-items:stretch;}
   .home-learn-secondary-list{justify-content:center;}
   .home-coverage-stages-grid{grid-template-columns:repeat(2,1fr);}
+
+  /* Article diagrams: mobile stacks everything in a single column (a
+     flow's steps run top-to-bottom, comparison cards stack); at this
+     width there's room to lay them out the way they're conceptually
+     meant to be read — a left-to-right sequence, side-by-side cards. */
+  .diagram-flow-list{flex-direction:row;align-items:stretch;}
+  .diagram-flow-item{flex-direction:row;align-items:center;flex:1;}
+  .diagram-flow-step{flex-direction:column;text-align:center;gap:8px;flex:1;}
+  .diagram-flow-arrow{transform:none;}
+  .diagram-compare2-grid{grid-template-columns:1fr 1fr;}
+  .diagram-grid-cols-2{grid-template-columns:repeat(2,1fr);}
+  .diagram-grid-cols-3{grid-template-columns:repeat(3,1fr);}
+  .diagram-grid-cols-4{grid-template-columns:repeat(4,1fr);}
+  .diagram-cluster-wide .diagram-cluster-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
 }
 @media (min-width:960px){
   .learn-grid{grid-template-columns:repeat(3,1fr);}

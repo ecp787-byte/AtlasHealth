@@ -1,3 +1,8 @@
+// Same photo already sourced/validated for the homepage's "Business" path
+// card - reused here rather than sourcing a new one, so the two
+// touchpoints stay visually consistent.
+import businessMeeting from '../../../assets/business-meeting.jpg';
+
 export default {
   slug: 'coverage-guide-business-and-group-benefits',
   category: 'guides',
@@ -146,8 +151,8 @@ export default {
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing?start=1' },
   image: {
-    suggestion:
-      'A natural photo of a small team meeting or working together in an office or shop setting — avoid generic corporate boardroom stock photography; something that reads as a real small-to-midsize business.',
+    photo: businessMeeting,
+    photoPosition: '50% 30%',
     alt: 'A small business team meeting, representing group and business health benefits.',
   },
   sources: [

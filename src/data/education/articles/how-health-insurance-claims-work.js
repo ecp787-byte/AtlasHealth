@@ -164,7 +164,20 @@ export default {
   ],
   cta: { label: 'Get Help Navigating Your Coverage', href: '/otp-landing' },
   image: {
-    suggestion: 'A simple horizontal flow graphic showing the claims journey as connected icons: doctor visit, billing codes/document, insurer processing, EOB document, final bill — in the brand\'s color palette.',
-    alt: 'Diagram showing the health insurance claims process from a doctor visit through to an Explanation of Benefits and final bill',
+    diagram: {
+      type: 'FlowSteps',
+      props: {
+        title: 'From Appointment to Bill',
+        steps: [
+          { label: 'You receive care', detail: 'A visit, procedure, or prescription.' },
+          { label: 'Provider submits a claim', detail: 'Coded and sent to your insurer.' },
+          { label: 'Insurer processes it', detail: 'Applies the allowed rate and cost-sharing.' },
+          { label: 'You get an EOB', detail: 'A summary of the outcome — not a bill.' },
+          { label: 'Provider bills you', detail: 'For your remaining responsibility.' },
+        ],
+        footnote: 'This describes a typical in-network claim. Out-of-network care and services requiring prior authorization can follow a different path.',
+      },
+    },
+    alt: 'Flow diagram showing the health insurance claims process from a doctor visit through to an Explanation of Benefits and final bill.',
   },
 };

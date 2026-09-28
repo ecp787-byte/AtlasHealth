@@ -198,8 +198,19 @@ export default {
   ],
   cta: { label: 'Find Your Coverage', href: '/otp-landing' },
   image: {
-    suggestion: 'A simple graphic showing a labeled savings jar or account icon connected to a medical cross icon, with a small callout showing money growing tax-free over time — avoid depicting an actual insurance card or network map to prevent confusion with plan-type content.',
-    alt: 'Illustration of a Health Savings Account with tax-advantaged contributions, growth, and withdrawals for medical expenses.',
+    diagram: {
+      type: 'IconCluster',
+      props: {
+        title: 'The HSA\'s Triple Tax Advantage',
+        items: [
+          { n: 1, label: 'Contributions', detail: 'Go in pre-tax or tax-deductible, lowering your taxable income.' },
+          { n: 2, label: 'Growth', detail: 'Interest, dividends, and investment gains aren\'t taxed while they stay in the account.' },
+          { n: 3, label: 'Qualified withdrawals', detail: 'Come out tax-free for eligible medical expenses.' },
+        ],
+        footnote: 'Educational information, not personalized tax advice. Eligibility requires enrollment in a qualifying HDHP with no other disqualifying coverage.',
+      },
+    },
+    alt: 'Three-part diagram of an HSA\'s triple tax advantage: tax-free contributions, growth, and withdrawals.',
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },

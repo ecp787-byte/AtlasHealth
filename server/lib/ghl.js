@@ -1,50 +1,27 @@
 // ============================================================================
-// GOHIGHLEVEL CRM INTEGRATION — STUB
+// GOHIGHLEVEL CRM INTEGRATION
 // ----------------------------------------------------------------------------
-// Not wired to a real GHL account. This logs the payload it WOULD send so
-// the call site (routes/leads.js) doesn't need to change once this is real.
+// Activates automatically the moment GHL_API_KEY and GHL_LOCATION_ID are
+// both set (same pattern as Lead Prosper / Meta CAPI elsewhere in this
+// codebase) - until then, calls are logged as a stub so routes/leads.js
+// never has to change.
 //
-// TO MAKE THIS REAL:
-//   1. Get a GHL Private Integration API key + Location ID from the agency's
-//      GHL sub-account (Settings -> Business Profile -> API Keys, or the
-//      newer Private Integrations flow under Settings -> Private Integrations).
-//   2. Create the custom fields listed in ARCHITECTURE.md §6 in that GHL
-//      location (Settings -> Custom Fields) and note their field keys.
-//   3. Replace the body of upsertContact() below with real calls to the GHL
-//      v2 REST API, e.g.:
-//
-//      const res = await fetch('https://services.leadconnectorhq.com/contacts/upsert', {
-//        method: 'POST',
-//        headers: {
-//          Authorization: `Bearer ${process.env.GHL_API_KEY}`,
-//          Version: '2021-07-28',
-//          'Content-Type': 'application/json',
-//        },
-//        body: JSON.stringify({
-//          locationId: process.env.GHL_LOCATION_ID,
-//          firstName: lead.contact.firstName,
-//          lastName: lead.contact.lastName,
-//          email: lead.contact.email,
-//          phone: lead.phone,
-//          tags: buildTags(lead),
-//          customFields: buildCustomFields(lead),
-//        }),
-//      });
-//
-//   4. GHL workflows (built inside GHL, not in this code) should trigger off
-//      the tags this function applies - e.g. a workflow watching for
-//      "tier:hot" sends the immediate SMS/email/agent-notify/call-task
-//      described in ARCHITECTURE.md §10.
-//
-// Required env vars once real: GHL_API_KEY, GHL_LOCATION_ID.
+// Assumes the custom fields listed below already exist in this GHL location
+// (Settings -> Custom Fields) - GHL's upsert API accepts unknown field keys
+// silently dropping them, so if a field isn't showing up in GHL, check it
+// was created there with a matching key first.
 // ============================================================================
+
+const { GHL_API_KEY, GHL_LOCATION_ID } = process.env;
+export const USING_GHL_STUB = !(GHL_API_KEY && GHL_LOCATION_ID);
+const GHL_API_VERSION = '2021-07-28';
 
 export function buildTags(lead) {
   return [
     'source:veritas-funnel',
-    `tier:${lead.leadTier.toLowerCase()}`,
-    `route:${lead.routing}`,
-  ];
+    `tier:${(lead.leadTier || 'unscored').toLowerCase()}`,
+    lead.routing ? `route:${lead.routing}` : null,
+  ].filter(Boolean);
 }
 
 export function buildCustomFields(lead) {
@@ -69,6 +46,7 @@ export function buildCustomFields(lead) {
 
 export async function upsertContact(lead) {
   const payload = {
+    locationId: GHL_LOCATION_ID,
     firstName: lead.contact?.firstName,
     lastName: lead.contact?.lastName,
     email: lead.contact?.email,
@@ -76,7 +54,35 @@ export async function upsertContact(lead) {
     tags: buildTags(lead),
     customFields: buildCustomFields(lead),
   };
-  // eslint-disable-next-line no-console
-  console.log('[ghl stub] would upsert contact:', JSON.stringify(payload));
-  return { ok: true, stub: true };
+
+  if (USING_GHL_STUB) {
+    // eslint-disable-next-line no-console
+    console.log('[ghl stub] would upsert contact:', JSON.stringify(payload));
+    return { ok: true, stub: true };
+  }
+
+  try {
+    const res = await fetch('https://services.leadconnectorhq.com/contacts/upsert', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${GHL_API_KEY}`,
+        Version: GHL_API_VERSION,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      // eslint-disable-next-line no-console
+      console.log('[ghl] rejected:', res.status, JSON.stringify(data));
+      return { ok: false, ...data };
+    }
+    // eslint-disable-next-line no-console
+    console.log('[ghl] contact upserted:', data.contact?.id || '(no id returned)');
+    return { ok: true, ...data };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log('[ghl] request failed:', err.message);
+    return { ok: false, error: err.message };
+  }
 }

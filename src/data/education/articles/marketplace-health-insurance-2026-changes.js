@@ -198,7 +198,16 @@ export default {
   cta: { label: 'Compare Your Options', href: '/otp-landing' },
   image: {
     suggestion: 'A clean editorial graphic showing a simple 2025-to-2026 timeline or calendar transition in the brand palette, paired with a subtle upward-trending line to suggest the higher out-of-pocket limit — no alarmist imagery, no political symbolism.',
-    alt: 'Timeline graphic illustrating Marketplace health insurance changes taking effect in 2026',
+    alt: 'Chart comparing the ACA out-of-pocket maximum for individual and family coverage in 2025 versus 2026',
+    chart: {
+      title: 'ACA out-of-pocket maximum: 2025 vs. 2026',
+      series: ['2025', '2026'],
+      rows: [
+        { label: 'Individual', values: [9200, 10600] },
+        { label: 'Family', values: [18400, 21200] },
+      ],
+      footnote: 'Non-grandfathered ACA plans. Source: CMS "Marketplace Integrity and Affordability" final rule (June 25, 2025).',
+    },
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },

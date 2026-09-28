@@ -136,7 +136,31 @@ export default {
   ],
   cta: { label: 'Explore Health Plans', href: '/otp-landing' },
   image: {
-    suggestion: 'A clean side-by-side graphic: a coin/bill icon labeled "Copay — $50 flat" next to a pie-slice icon labeled "Coinsurance — 20% of cost," in the brand\'s color palette.',
-    alt: 'Illustration comparing a flat-dollar copay to a percentage-based coinsurance charge',
+    diagram: {
+      type: 'CompareTwo',
+      props: {
+        title: 'A Flat Fee vs. a Percentage of the Bill',
+        left: {
+          label: 'Copay',
+          tag: 'Flat amount',
+          stats: [
+            { label: 'Specialist visit copay', value: '$50' },
+            { label: 'You pay, regardless of the bill', value: '$50' },
+          ],
+          note: 'Known in advance — usually printed right on your insurance card.',
+        },
+        right: {
+          label: 'Coinsurance',
+          tag: '20% of allowed cost',
+          stats: [
+            { label: 'On a $500 procedure', value: '$100' },
+            { label: 'On a $20,000 hospital stay', value: '$4,000' },
+          ],
+          note: 'Scales with the size of the bill — harder to predict without knowing the cost in advance.',
+        },
+        footnote: 'Hypothetical examples. Both count toward your deductible and out-of-pocket maximum according to your plan\'s specific terms.',
+      },
+    },
+    alt: 'Comparison of a flat-dollar copay against percentage-based coinsurance on two example bills.',
   },
 };

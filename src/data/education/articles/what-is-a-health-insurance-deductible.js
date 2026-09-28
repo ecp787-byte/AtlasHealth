@@ -182,9 +182,26 @@ export default {
   ],
   cta: { label: 'Compare Your Options', href: '/otp-landing' },
   image: {
-    suggestion:
-      'A clean, modern infographic-style photo or illustration showing a simple visual "meter" or fill-bar concept representing a deductible being met, paired with a small side-by-side of an individual vs. family deductible — avoid stock photos of stethoscopes or clipboards.',
-    alt: 'Illustration representing a health insurance deductible as a threshold that must be reached before certain plan cost-sharing begins.',
+    diagram: {
+      type: 'CostMeter',
+      props: {
+        title: 'How an Embedded Family Deductible Fills',
+        max: 6000,
+        bars: [
+          {
+            label: 'Family plan with a $3,000 individual / $6,000 family deductible',
+            aria: 'One family member meets their own $3,000 embedded deductible; the remaining $3,000 is what the rest of the household would still need to spend to meet the full $6,000 family deductible.',
+            marker: 'One person\'s embedded deductible met here',
+            segments: [
+              { label: 'This person\'s embedded deductible: $3,000', from: 0, to: 3000, tone: 'a' },
+              { label: 'Remaining to full family deductible: $3,000', from: 3000, to: 6000, tone: 'b' },
+            ],
+          },
+        ],
+        footnote: 'Hypothetical example. In an embedded design, one household member meeting their own embedded deductible can start plan cost-sharing for that person, even before the rest of the family reaches the full family deductible. Structure varies by plan — confirm with your Summary of Benefits and Coverage.',
+      },
+    },
+    alt: 'Bar showing how an embedded individual deductible fills within a larger family deductible.',
   },
   sources: [
     { label: 'IRS.gov — Rev. Proc. governing 2026 HSA/HDHP limits', url: 'https://www.irs.gov' },

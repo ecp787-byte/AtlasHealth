@@ -162,9 +162,26 @@ export default {
   ],
   cta: { label: 'Find Your Coverage', href: '/otp-landing' },
   image: {
-    suggestion:
-      'A clean infographic-style visual showing a progress bar or thermometer filling up from $0 to the out-of-pocket maximum, with labeled sections for deductible, coinsurance, and a "plan pays 100%" zone at the top.',
-    alt: 'Illustration of medical costs accumulating toward a health plan’s out-of-pocket maximum',
+    diagram: {
+      type: 'CostMeter',
+      props: {
+        title: 'How a $60,000 Hospitalization Builds Toward the Out-of-Pocket Max',
+        max: 9000,
+        bars: [
+          {
+            label: 'Hypothetical plan: $2,500 deductible, 20% coinsurance, $9,000 out-of-pocket max',
+            aria: 'The first $2,500 is the deductible, paid in full. From $2,500 to $9,000, the enrollee pays 20% coinsurance on the remaining allowed costs. Beyond $9,000, the plan pays 100% for the rest of the plan year.',
+            marker: '20% coinsurance zone',
+            segments: [
+              { label: 'Deductible: $2,500', from: 0, to: 2500, tone: 'a' },
+              { label: 'Coinsurance (20%) to out-of-pocket max', from: 2500, to: 9000, tone: 'b' },
+            ],
+          },
+        ],
+        footnote: 'Hypothetical example only. Once the enrollee\'s cost-sharing reaches the $9,000 out-of-pocket maximum, the plan pays 100% of allowed, in-network costs for the rest of that plan year — even though the $60,000 hospital bill is far larger.',
+      },
+    },
+    alt: 'Bar showing costs accumulating through a deductible and coinsurance zone toward a health plan\'s out-of-pocket maximum.',
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },

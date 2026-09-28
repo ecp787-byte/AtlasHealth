@@ -145,7 +145,33 @@ export default {
   ],
   cta: { label: 'Talk With a Coverage Guide', href: '/otp-landing' },
   image: {
-    suggestion: 'A simple two-panel visual: one panel showing a comprehensive major medical plan (deductible → coinsurance → out-of-pocket max) as a continuous path, the other showing a fixed indemnity payout as a single flat cash amount tied to one event icon (e.g., a hospital bed). Brand palette, no stock photo of a hospital.',
-    alt: 'Diagram comparing how a comprehensive major medical plan pays versus how a fixed indemnity benefit pays a flat amount per event',
+    diagram: {
+      type: 'CompareTwo',
+      props: {
+        title: 'A $27,000 Hospital Stay, Two Ways',
+        left: {
+          label: 'Major Medical Plan',
+          tag: 'Pays based on cost',
+          stats: [
+            { label: 'What triggers payment', value: 'Any covered service' },
+            { label: 'Has a deductible, coinsurance, OOP max', value: 'Yes' },
+            { label: 'Role', value: 'Primary coverage' },
+          ],
+          note: 'Designed to cover the broad range of medical care you might need.',
+        },
+        right: {
+          label: 'Fixed Indemnity Plan',
+          tag: 'Pays a flat amount',
+          stats: [
+            { label: 'Benefit', value: '$150 / day hospitalized' },
+            { label: '3-day stay pays', value: '$450' },
+            { label: 'Remaining bill', value: 'Still your (or your plan\'s) responsibility' },
+          ],
+          note: 'Pays the same $450 regardless of whether the bill is $27,000 or $2,700.',
+        },
+        footnote: 'Hypothetical example. Indemnity, hospital indemnity, accident, and critical illness products are designed to supplement — not replace — comprehensive major medical coverage.',
+      },
+    },
+    alt: 'Comparison of a comprehensive major medical plan against a fixed indemnity plan\'s flat per-day payout.',
   },
 };

@@ -246,8 +246,19 @@ export default {
   ],
   cta: { label: 'Find Your Coverage', href: '/otp-landing' },
   image: {
-    suggestion: 'A clean side-by-side visual comparing two plan cards (lower premium/higher deductible vs. higher premium/lower deductible), or a simple bar chart illustrating the light-use vs. heavy-use cost comparison from the article.',
-    alt: 'Side-by-side comparison of two health insurance plans showing premium, deductible, and out-of-pocket differences.',
+    diagram: {
+      type: 'PlanCostBarChart',
+      props: {
+        title: 'Total Potential Annual Cost, By Usage',
+        series: ['Plan A (Lower Premium)', 'Plan B (Higher Premium)'],
+        groups: [
+          { label: 'Light-Use Year', values: [4500, 6300] },
+          { label: 'Heavy-Use Year', values: [12900, 11700] },
+        ],
+        footnote: 'Hypothetical example: Plan A ($325/mo, $6,000 deductible) vs. Plan B ($475/mo, $1,000 deductible). Plan A wins in a light-use year; Plan B wins once both plans hit their maximum out-of-pocket.',
+      },
+    },
+    alt: 'Bar chart comparing two health insurance plans\' total potential annual cost in a light-use year versus a heavy-use year.',
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },

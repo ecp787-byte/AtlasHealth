@@ -247,9 +247,20 @@ export default {
   ],
   cta: { label: 'Understand Your Options', href: '/otp-landing' },
   image: {
-    suggestion:
-      'A clean, modern infographic-style photo or illustration showing a simple visual funnel of premium → deductible → copay/coinsurance → out-of-pocket maximum, or a warm photo of a patient reviewing a bill or benefits statement at home.',
-    alt: 'Illustration of the health insurance cost-sharing process, from monthly premium through deductible, copay, coinsurance, and out-of-pocket maximum.',
+    diagram: {
+      type: 'FlowSteps',
+      props: {
+        title: 'How the Pieces Fit Together',
+        steps: [
+          { label: 'Premium', detail: 'Paid monthly, whether or not you use care.' },
+          { label: 'Deductible', detail: 'You pay first, until it\'s met for the year.' },
+          { label: 'Copay / Coinsurance', detail: 'Your share after the deductible.' },
+          { label: 'Out-of-Pocket Max', detail: 'Plan pays 100% once you hit this ceiling.' },
+        ],
+        footnote: 'The order these apply in, and which services skip the deductible, varies by plan — check your Summary of Benefits and Coverage.',
+      },
+    },
+    alt: 'Flow diagram showing premium, deductible, copay or coinsurance, and out-of-pocket maximum in sequence.',
   },
   sources: [
     { label: 'HealthCare.gov', url: 'https://www.healthcare.gov' },
