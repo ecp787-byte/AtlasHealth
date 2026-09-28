@@ -248,6 +248,65 @@ license states / NPN), the "not affiliated with any government agency"
 statement, and Privacy/Terms/Contact links, shown on both the landing and
 results pages.
 
+### 8a. Why `/privacy` and `/terms` are statically prerendered
+
+This app is a client-rendered SPA with no server-side rendering — `App.jsx`
+picks what to show based on `window.location.pathname`, entirely inside
+React, after the JS bundle loads. That's fine for a real browser, but a
+plain HTTP fetch with no JS execution (a compliance bot, an ad platform's
+crawler, `curl`) gets back nothing but an empty `<div id="root"></div>` and
+a `<script>` tag — no policy text at all. Twilio's A2P 10DLC campaign
+review fetches the submitted Privacy Policy URL exactly that way, and
+rejected an earlier submission with error 30908 ("a compliant privacy
+policy can not be verified") for this reason. The same failure mode likely
+also affects other ad platforms' automated policy-URL checks (Google Ads,
+Meta, TikTok), not just Twilio.
+
+The fix (`scripts/generate-legal-pages.mjs`, run automatically as part of
+`npm run build`): server-render the exact same `LegalPage` component (same
+data source as the live SPA, so it can never drift out of sync) to a
+static HTML string at build time, and write it to `dist/privacy/index.html`
+and `dist/terms/index.html`.
+
+That alone isn't enough, because of how this project serves `dist/` in
+production (`npx serve dist -l $PORT`, Render's start command for
+`atlas-health-web`). The original start command used `serve`'s `-s`
+(`--single`) flag, meant for SPA fallback — but `-s` installs an *implicit
+catch-all rewrite* that matches every extensionless path (including
+`/privacy` and `/terms`) straight to `index.html`, and `serve-handler`
+checks that rewrite *before* checking whether a real file exists on disk.
+So the generated static pages were being silently shadowed by the SPA
+shell even though they existed and were correct.
+
+The fix for that: drop `-s` entirely, and use `public/serve.json`
+(copied into `dist/` by Vite automatically) with `rewrites` scoped only to
+the two paths that actually need SPA fallback:
+
+```json
+{
+  "rewrites": [
+    { "source": "/otp-landing", "destination": "/index.html" },
+    { "source": "/otp-landing/**", "destination": "/index.html" },
+    { "source": "/learn", "destination": "/index.html" },
+    { "source": "/learn/**", "destination": "/index.html" }
+  ]
+}
+```
+
+With no rewrite claiming `/privacy` or `/terms`, `serve` falls through to
+its normal static/directory lookup and serves the real prerendered files.
+`scripts/generate-legal-pages.mjs` also copies the SPA shell to
+`dist/404.html`, so a genuinely unknown path (stray old link, typo) still
+gets the SPA shell body — preserving `App.jsx`'s client-side
+redirect-to-`/` for bad links — while correctly returning a real HTTP 404
+status instead of the old silent 200.
+
+**Render's start command for `atlas-health-web` must be
+`npx serve dist -l $PORT`** (no `-s`) for this to work — verified locally
+by running the built `dist/` through `serve` without `-s` and fetching
+`/privacy`, `/terms`, `/`, `/otp-landing`, `/learn/...`, and an unknown
+path directly.
+
 ## 9. Page structure
 
 ```

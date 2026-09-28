@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/otp-landing", "destination": "/index.html" },
+    { "source": "/otp-landing/**", "destination": "/index.html" },
+    { "source": "/learn", "destination": "/index.html" },
+    { "source": "/learn/**", "destination": "/index.html" }
+  ]
+}
