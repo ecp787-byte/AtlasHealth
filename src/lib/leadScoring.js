@@ -14,6 +14,8 @@
 // both places, no drift.
 // ============================================================================
 
+import { MULTI_PERSON_HOUSEHOLDS } from '../data/quizConfig.js';
+
 export const SCORING_WEIGHTS = {
   // Verification carries the single heaviest weight: an unverified phone
   // number is close to worthless to a call center, no matter how well the
@@ -109,8 +111,10 @@ export function scoreLead(answers = {}) {
     score += w.assessmentCompleted;
   }
 
-  const hasDependents =
-    Array.isArray(answers.dependentAges) && answers.dependentAges.length > 0;
+  // The funnel no longer collects individual dependent ages (removed to cut
+  // a step) — the household category answer alone ("spouse"/"children"/
+  // "family") is the has-dependents signal now.
+  const hasDependents = MULTI_PERSON_HOUSEHOLDS.includes(answers.household);
   if (hasDependents) {
     breakdown.hasDependents = w.hasDependents;
     score += w.hasDependents;

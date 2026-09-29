@@ -18,12 +18,12 @@ Landing (LandingHero.jsx)
 Quiz (QuizEngine.jsx, driven by src/data/quizConfig.js)
    │  each step: card select / input → validate → advance
    │  progress saved to sessionStorage after every step (src/lib/progress.js)
-   │  ...primary_need → household → age → [dependent_ages] → current_coverage
+   │  ...primary_need → household → age → current_coverage
    │     → [aca_subsidy] → [coverage_end_date] → [uninsured_duration]
    │     → [current_premium] → target_budget → coverage_start
    │     → healthcare_usage → takes_medication → [ongoing_medication]
-   │     → [eligibility questions, disabled] → zip → contact
-   │     → phone → OTP verify → consent → submit
+   │     → [eligibility questions, disabled] → contact_info (name, phone,
+   │        email, ZIP - one screen) → OTP verify → consent → submit
    ▼
 Results (ResultsPage.jsx)
    - scores the lead (src/lib/leadScoring.js)
@@ -47,23 +47,20 @@ possible without special-casing the engine.
 | 1 | `primary_need` | What are you primarily looking for? | cards | always |
 | 2 | `household` | Who needs coverage? | cards | always |
 | 3 | `age` | What is your age? | numeric | always |
-| 4 | `dependent_ages` | Who else needs coverage? | dynamic list | household implies >1 person |
-| 5 | `current_coverage` | What type of coverage do you currently have? | cards | always |
-| 6 | `aca_subsidy` | Do you receive a premium tax credit? | yes/no | current_coverage = marketplace |
-| 7 | `coverage_end_date` | When does your current coverage end? | date | losing coverage or on COBRA |
-| 8 | `uninsured_duration` | How long have you been without coverage? | cards | current_coverage = none |
-| 9 | `current_premium` | What are you currently paying per month? | cards | currently insured |
-| 10 | `target_budget` | What would you ideally like to spend? | cards, household-scaled | always |
-| 11 | `coverage_start` | When would you like new coverage to begin? | cards | always |
-| 12 | `healthcare_usage` | How often do you use healthcare? | cards | always |
-| 13 | `takes_medication` | Do you take prescription medications? | yes/no | always |
-| 14 | `ongoing_medication` | Are these regular, ongoing prescriptions? | yes/no | takes_medication = yes |
+| 4 | `current_coverage` | What type of coverage do you currently have? | cards | always |
+| 5 | `aca_subsidy` | Do you receive a premium tax credit? | yes/no | current_coverage = marketplace |
+| 6 | `coverage_end_date` | When does your current coverage end? | date | losing coverage or on COBRA |
+| 7 | `uninsured_duration` | How long have you been without coverage? | cards | current_coverage = none |
+| 8 | `current_premium` | What are you currently paying per month? | cards | currently insured |
+| 9 | `target_budget` | What would you ideally like to spend? | cards, household-scaled | always |
+| 10 | `coverage_start` | When would you like new coverage to begin? | cards | always |
+| 11 | `healthcare_usage` | How often do you use healthcare? | cards | always |
+| 12 | `takes_medication` | Do you take prescription medications? | yes/no | always |
+| 13 | `ongoing_medication` | Are these regular, ongoing prescriptions? | yes/no | takes_medication = yes |
 | — | *(eligibility questions)* | *placeholder, disabled* | yes/no | `ELIGIBILITY_ENABLED` (false) |
-| 15 | `zip` | What is your ZIP code? | numeric | always |
-| 16 | `contact` | First/last name + email | text fields | always |
-| 17 | `phone` | Best number to reach you | tel | always — **last**, per spec |
-| 18 | `otp` | 6-digit verification code | OTP | immediately after phone |
-| 19 | `consent` | Review & submit | consent + summary | last |
+| 14 | `contact_info` | Name, phone, email, ZIP — one screen | text fields | always |
+| 15 | `otp` | 6-digit verification code | OTP | immediately after contact_info |
+| 16 | `consent` | Review & submit | consent + summary | last |
 
 Age is collected as a plain integer, not DOB. Rationale: this product doesn't
 need a birthdate for anything shown here (no age-banded rate table is being
@@ -74,11 +71,31 @@ integration needs DOB specifically, that's a one-line change to the `age`
 step's `type` and validator — the engine doesn't care which shape the field
 takes.
 
+**Step-count cuts (this revision):** two changes were made purely to reduce
+steps and abandonment risk, with no loss of anything `leadScoring.js`
+actually uses:
+
+- **Removed the `dependent_ages` follow-up.** The `household` step already
+  asks who needs coverage as a category (spouse / children / family /
+  child(ren) only) — that's the real signal. Asking for each dependent's
+  individual age afterward was extra friction that fed only cosmetic detail;
+  `leadScoring.js`'s has-dependents signal now reads the `household`
+  category directly (`MULTI_PERSON_HOUSEHOLDS`) instead of a dependent-ages
+  array.
+- **Merged `zip` + `contact` + `phone` into one `contact_info` screen**
+  (`StepContactInfo.jsx`) — name, phone, email, and ZIP collected together
+  instead of three separate steps. These four fields have no branching and
+  nothing to react to mid-entry, so there was no UX reason to force three
+  taps-to-continue. Phone is still verified by OTP immediately afterward,
+  unchanged.
+
+Together these cut 2–3 steps off every completion (3 for multi-person
+households), on top of the steps that were already conditional.
+
 ## 3. Conditional logic map
 
 Implemented as `showIf(answers)` predicates in `quizConfig.js`:
 
-- `household` implies multiple people (`spouse`, `children`, `family`) → show `dependent_ages`.
 - `current_coverage = marketplace` → show `aca_subsidy`.
 - `primary_need = losing_coverage` OR `current_coverage = cobra` → show `coverage_end_date`.
 - `current_coverage = none` → show `uninsured_duration`; skip `current_premium`.
@@ -148,7 +165,7 @@ this is the contract a real `/api/leads` endpoint should accept):
   zip: "78701",
   state: "TX",                 // derived, approximate — see zipToState.js
   household: "family",
-  dependentAges: ["8", "41"],
+  dependentAges: [],           // always empty now — see §2, "Step-count cuts"
   currentCoverage: "marketplace",
   currentPremium: "500_750",
   targetBudget: "400_700",
@@ -180,7 +197,7 @@ Not included above but tracked separately: funnel abandonment step (via
 | `otpVerified` | Custom field: `phone_verified` (boolean) | gates automations below |
 | `zip` / `state` | Contact: Postal Code / State | standard |
 | `household` | Custom field: `household_composition` | picklist matching quiz values |
-| `dependentAges` | Custom field: `dependent_ages` (text, comma-joined) | GHL has no native array field |
+| `dependentAges` | Custom field: `dependent_ages` (text, comma-joined) | always empty now — kept in the payload shape in case per-dependent detail is wanted again later; `household` carries the real signal |
 | `currentCoverage` | Custom field: `current_coverage_type` | picklist |
 | `currentPremium` | Custom field: `current_premium_range` | picklist |
 | `targetBudget` | Custom field: `target_budget_range` | picklist |
@@ -321,8 +338,12 @@ src/
       QuizEngine.jsx         reads quizConfig.js, renders the active step
       ProgressBar.jsx
       StepShell.jsx          shared header/question/CTA-bar chrome
-      StepCards.jsx / StepYesNo.jsx / StepAge.jsx / StepZip.jsx
-      StepDependentAges.jsx / StepContact.jsx / StepPhone.jsx
+      StepCards.jsx / StepYesNo.jsx / StepAge.jsx / StepDob.jsx
+      StepZip.jsx / StepContact.jsx / StepPhone.jsx  (still used by the
+        Fast Track variant's step list; the default Guided flow uses
+        StepContactInfo.jsx instead, which combines all three)
+      StepDependentAges.jsx  (no longer referenced by either step list —
+        kept in case per-dependent detail is wanted again)
       StepOtp.jsx / StepConsent.jsx
   data/
     quizConfig.js           question flow — the single source of truth

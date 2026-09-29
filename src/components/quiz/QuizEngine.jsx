@@ -17,6 +17,7 @@ import StepZip from './StepZip.jsx';
 import { isValidZip } from '../../lib/zipToState.js';
 import StepContact, { contactValid } from './StepContact.jsx';
 import StepPhone, { isValidPhone } from './StepPhone.jsx';
+import StepContactInfo, { contactInfoValid } from './StepContactInfo.jsx';
 import StepOtp from './StepOtp.jsx';
 import StepConsent from './StepConsent.jsx';
 
@@ -230,6 +231,29 @@ export default function QuizEngine({ onComplete }) {
           }}
         >
           <StepPhone value={value} onChange={(v) => setField(field, v)} autoFocus />
+        </StepShell>
+      );
+
+    case STEP_TYPES.CONTACT_INFO:
+      return (
+        <StepShell
+          {...shellCommon}
+          showContinue
+          continueDisabled={!contactInfoValid({ contact: answers.contact, phone: answers.phone, zip: answers.zip })}
+          continueLabel="Send code"
+          onContinue={() => {
+            trackEvent(EVENTS.PHONE_SUBMITTED);
+            goNext();
+          }}
+        >
+          <StepContactInfo
+            contact={answers.contact}
+            phone={answers.phone}
+            zip={answers.zip}
+            onChangeContact={(v) => setField('contact', v)}
+            onChangePhone={(v) => setField('phone', v)}
+            onChangeZip={(v) => setField('zip', v)}
+          />
         </StepShell>
       );
 

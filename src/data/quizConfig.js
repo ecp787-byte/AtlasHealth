@@ -27,6 +27,7 @@ export const STEP_TYPES = {
   DEPENDENT_AGES: 'dependent-ages',
   ZIP: 'zip',
   CONTACT: 'contact',
+  CONTACT_INFO: 'contact-info',
   TEXT: 'text',
   PHONE: 'phone',
   OTP: 'otp',
@@ -49,9 +50,10 @@ export const FUNNEL_VARIANT =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_FUNNEL_VARIANT) || 'guided';
 
 // Household sizes that mean "more than one person needs coverage" — used to
-// decide whether to ask the dependent-ages follow-up and to scale the target
-// budget ranges.
-const MULTI_PERSON_HOUSEHOLDS = ['spouse', 'children', 'family'];
+// scale the target budget ranges and (in leadScoring.js) as the
+// has-dependents scoring signal now that we no longer collect individual
+// dependent ages (see the removed `dependent_ages` step below).
+export const MULTI_PERSON_HOUSEHOLDS = ['spouse', 'children', 'family'];
 
 // --------------------------------------------------------------------------
 // ELIGIBILITY / MEDICAL UNDERWRITING QUESTIONS
@@ -138,15 +140,6 @@ export const QUIZ_STEPS = [
     question: 'What is your age?',
     helper: 'This helps us match you to plans you actually qualify for.',
     field: 'age',
-  },
-  {
-    id: 'dependent_ages',
-    type: STEP_TYPES.DEPENDENT_AGES,
-    question: 'Who else needs coverage?',
-    helper: 'Add the age of each additional family member.',
-    field: 'dependentAges',
-    // Only asked when the household answer implies more than one person.
-    showIf: (a) => MULTI_PERSON_HOUSEHOLDS.includes(a.household),
   },
   {
     id: 'current_coverage',
@@ -252,27 +245,14 @@ export const QUIZ_STEPS = [
   },
   // Eligibility/underwriting questions (disabled by default — see above).
   ...eligibilityEnabledSteps(),
+  // Name, phone, email, and ZIP collected together on one screen instead of
+  // three separate steps — see StepContactInfo.jsx. Phone is still verified
+  // by OTP immediately afterward, per spec.
   {
-    id: 'zip',
-    type: STEP_TYPES.ZIP,
-    question: 'What is your ZIP code?',
-    helper: "We'll use this to show coverage available in your area.",
-    field: 'zip',
-  },
-  {
-    id: 'contact',
-    type: STEP_TYPES.CONTACT,
+    id: 'contact_info',
+    type: STEP_TYPES.CONTACT_INFO,
     question: "Almost done — where should we send your options?",
-    field: 'contact', // writes { firstName, lastName, email }
-  },
-  // Phone is collected LAST, after the rest of the assessment, followed
-  // immediately by OTP verification — per spec, never earlier in the flow.
-  {
-    id: 'phone',
-    type: STEP_TYPES.PHONE,
-    question: "What's the best number to reach you at?",
     helper: "We'll text a one-time code to verify it's really you before connecting you with an agent.",
-    field: 'phone',
   },
   {
     id: 'otp',
