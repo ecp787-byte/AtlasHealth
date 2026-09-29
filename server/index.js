@@ -37,6 +37,7 @@ app.get('/health', (_req, res) => res.json({
     pixelId: !!process.env.META_PIXEL_ID,
     accessToken: !!process.env.META_CAPI_ACCESS_TOKEN,
   },
+  trustedFormRetainConfigured: !!process.env.TRUSTEDFORM_API_KEY,
   adminApiConfigured: !!process.env.ADMIN_API_KEY,
 }));
 app.use('/api/otp', otpRoutes);
@@ -78,6 +79,8 @@ app.listen(PORT, () => {
     '[env check] META_PIXEL_ID set:', !!process.env.META_PIXEL_ID,
     '| META_CAPI_ACCESS_TOKEN set:', !!process.env.META_CAPI_ACCESS_TOKEN,
   );
+  // eslint-disable-next-line no-console
+  console.log('[env check] TRUSTEDFORM_API_KEY set:', !!process.env.TRUSTEDFORM_API_KEY);
   // eslint-disable-next-line no-console
   console.log('[env check] DATABASE_URL set:', !!process.env.DATABASE_URL, '| ADMIN_API_KEY set:', !!process.env.ADMIN_API_KEY);
 });

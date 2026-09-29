@@ -3,6 +3,7 @@ import { scoreLead } from '../lib/leadScoring.js';
 import { upsertContact } from '../lib/ghl.js';
 import { sendConversionEvent } from '../lib/meta.js';
 import { postToLeadProsper } from '../lib/leadProsper.js';
+import { retainTrustedFormCert } from '../lib/trustedFormRetain.js';
 import { isDbConfigured, insertLead, listLeads, countLeads } from '../lib/db.js';
 
 const router = Router();
@@ -51,12 +52,19 @@ router.post('/', async (req, res) => {
     console.error('[leads] failed to persist lead:', err.message);
   }
 
-  const [ghlResult, metaResult, leadProsperResult] = await Promise.all([
+  const [ghlResult, metaResult, leadProsperResult, trustedFormRetainResult] = await Promise.all([
     upsertContact(lead),
     lead.otpVerified ? sendConversionEvent('QualifiedLead', lead, requestMeta) : Promise.resolve({ skipped: true }),
     // Only sell verified leads into the exchange - an unverified phone
     // number isn't a lead a buyer should pay for.
     lead.otpVerified ? postToLeadProsper(lead, requestMeta) : Promise.resolve({ skipped: true }),
+    // Permanently retain the TrustedForm certificate now, at submission
+    // time - ActiveProspect auto-deletes an unretained certificate within
+    // days, and this account's Auto-Retain toggle isn't usable, so this is
+    // the only thing standing between "we have consent proof" and "we
+    // don't" a few days from now. Retain regardless of otpVerified - even
+    // an unverified visit's certificate is worth keeping as a record.
+    retainTrustedFormCert(lead),
   ]);
 
   res.status(201).json({
@@ -66,6 +74,7 @@ router.post('/', async (req, res) => {
     ghl: ghlResult,
     meta: metaResult,
     leadProsper: leadProsperResult,
+    trustedFormRetain: trustedFormRetainResult,
   });
 });
 
