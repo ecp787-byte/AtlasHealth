@@ -135,11 +135,11 @@ export const QUIZ_STEPS = [
     options: HOUSEHOLD_OPTIONS,
   },
   {
-    id: 'age',
-    type: STEP_TYPES.AGE,
-    question: 'What is your age?',
+    id: 'dob',
+    type: STEP_TYPES.DOB,
+    question: 'What is your date of birth?',
     helper: 'This helps us match you to plans you actually qualify for.',
-    field: 'age',
+    field: 'dob',
   },
   {
     id: 'current_coverage',
@@ -165,14 +165,6 @@ export const QUIZ_STEPS = [
     showIf: (a) => a.currentCoverage === 'marketplace',
   },
   {
-    id: 'coverage_end_date',
-    type: STEP_TYPES.TEXT,
-    inputType: 'date',
-    question: 'When does your current coverage end?',
-    field: 'coverageEndDate',
-    showIf: (a) => a.primaryNeed === 'losing_coverage' || a.currentCoverage === 'cobra',
-  },
-  {
     id: 'uninsured_duration',
     type: STEP_TYPES.CARDS,
     question: 'About how long have you been without coverage?',
@@ -184,21 +176,6 @@ export const QUIZ_STEPS = [
       { value: 'gt_1yr', label: 'Over a year' },
     ],
     showIf: (a) => a.currentCoverage === 'none',
-  },
-  {
-    id: 'current_premium',
-    type: STEP_TYPES.CARDS,
-    question: 'What are you currently paying per month?',
-    field: 'currentPremium',
-    options: [
-      { value: 'under_300', label: 'Under $300' },
-      { value: '300_500', label: '$300–$500' },
-      { value: '500_750', label: '$500–$750' },
-      { value: '750_1000', label: '$750–$1,000' },
-      { value: 'over_1000', label: '$1,000+' },
-      { value: 'not_sure', label: 'Not sure / currently uninsured' },
-    ],
-    showIf: (a) => a.currentCoverage !== 'none',
   },
   {
     id: 'target_budget',
@@ -235,13 +212,6 @@ export const QUIZ_STEPS = [
     type: STEP_TYPES.YES_NO,
     question: 'Do you currently take prescription medications?',
     field: 'takesMedication',
-  },
-  {
-    id: 'ongoing_medication',
-    type: STEP_TYPES.YES_NO,
-    question: 'Are these regular, ongoing prescriptions (taken every month)?',
-    field: 'ongoingMedication',
-    showIf: (a) => a.takesMedication === 'yes',
   },
   // Eligibility/underwriting questions (disabled by default — see above).
   ...eligibilityEnabledSteps(),

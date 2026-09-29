@@ -18,10 +18,10 @@ Landing (LandingHero.jsx)
 Quiz (QuizEngine.jsx, driven by src/data/quizConfig.js)
    │  each step: card select / input → validate → advance
    │  progress saved to sessionStorage after every step (src/lib/progress.js)
-   │  ...primary_need → household → age → current_coverage
-   │     → [aca_subsidy] → [coverage_end_date] → [uninsured_duration]
-   │     → [current_premium] → target_budget → coverage_start
-   │     → healthcare_usage → takes_medication → [ongoing_medication]
+   │  ...primary_need → household → dob → current_coverage
+   │     → [aca_subsidy] → [uninsured_duration]
+   │     → target_budget → coverage_start
+   │     → healthcare_usage → takes_medication
    │     → [eligibility questions, disabled] → contact_info (name, phone,
    │        email, ZIP - one screen) → OTP verify → consent → submit
    ▼
@@ -46,34 +46,30 @@ possible without special-casing the engine.
 |---|---|---|---|---|
 | 1 | `primary_need` | What are you primarily looking for? | cards | always |
 | 2 | `household` | Who needs coverage? | cards | always |
-| 3 | `age` | What is your age? | numeric | always |
+| 3 | `dob` | What is your date of birth? | typed MM/DD/YYYY | always |
 | 4 | `current_coverage` | What type of coverage do you currently have? | cards | always |
 | 5 | `aca_subsidy` | Do you receive a premium tax credit? | yes/no | current_coverage = marketplace |
-| 6 | `coverage_end_date` | When does your current coverage end? | date | losing coverage or on COBRA |
-| 7 | `uninsured_duration` | How long have you been without coverage? | cards | current_coverage = none |
-| 8 | `current_premium` | What are you currently paying per month? | cards | currently insured |
-| 9 | `target_budget` | What would you ideally like to spend? | cards, household-scaled | always |
-| 10 | `coverage_start` | When would you like new coverage to begin? | cards | always |
-| 11 | `healthcare_usage` | How often do you use healthcare? | cards | always |
-| 12 | `takes_medication` | Do you take prescription medications? | yes/no | always |
-| 13 | `ongoing_medication` | Are these regular, ongoing prescriptions? | yes/no | takes_medication = yes |
+| 6 | `uninsured_duration` | How long have you been without coverage? | cards | current_coverage = none |
+| 7 | `target_budget` | What would you ideally like to spend? | cards, household-scaled | always |
+| 8 | `coverage_start` | When would you like new coverage to begin? | cards | always |
+| 9 | `healthcare_usage` | How often do you use healthcare? | cards | always |
+| 10 | `takes_medication` | Do you take prescription medications? | yes/no | always |
 | — | *(eligibility questions)* | *placeholder, disabled* | yes/no | `ELIGIBILITY_ENABLED` (false) |
-| 14 | `contact_info` | Name, phone, email, ZIP — one screen | text fields | always |
-| 15 | `otp` | 6-digit verification code | OTP | immediately after contact_info |
-| 16 | `consent` | Review & submit | consent + summary | last |
+| 11 | `contact_info` | Name, phone, email, ZIP — one screen | text fields | always |
+| 12 | `otp` | 6-digit verification code | OTP | immediately after contact_info |
+| 13 | `consent` | Review & submit | consent + summary | last |
 
-Age is collected as a plain integer, not DOB. Rationale: this product doesn't
-need a birthdate for anything shown here (no age-banded rate table is being
-quoted in-app — a human agent quotes real plans), and collecting one extra
-precise piece of PII (full DOB) than the funnel needs cuts against the
-"collect the minimum necessary" requirement. If the eventual CRM/rating
-integration needs DOB specifically, that's a one-line change to the `age`
-step's `type` and validator — the engine doesn't care which shape the field
-takes.
+Date of birth, not a bare age integer — typed as MM/DD/YYYY
+(`StepDob.jsx`), not a native calendar picker, same input pattern the Fast
+Track variant already used. This also fixes a real gap: `ResultsPage.jsx`'s
+submit payload has always read `answers.dob`, not `answers.age` — so the
+Guided flow's old age-integer answer was silently never making it into the
+lead payload at all. Collecting DOB directly means the Guided flow now
+actually submits it, same as Fast Track always has.
 
-**Step-count cuts (this revision):** two changes were made purely to reduce
-steps and abandonment risk, with no loss of anything `leadScoring.js`
-actually uses:
+**Step-count cuts (this revision):** several changes were made purely to
+reduce steps and abandonment risk, with no loss of anything
+`leadScoring.js` actually uses:
 
 - **Removed the `dependent_ages` follow-up.** The `household` step already
   asks who needs coverage as a category (spouse / children / family /
@@ -88,19 +84,37 @@ actually uses:
   nothing to react to mid-entry, so there was no UX reason to force three
   taps-to-continue. Phone is still verified by OTP immediately afterward,
   unchanged.
+- **Removed `coverage_end_date`.** Like `dependentAges`, this field was
+  never actually included in `ResultsPage.jsx`'s submit payload — it was
+  collected (via a native, unstyled `<input type="date">`, the one step
+  that broke from the rest of the funnel's card/typed-input pattern) and
+  then silently dropped. No scoring, routing, or CRM mapping referenced it
+  either, so removing it costs nothing and drops a step for exactly the
+  segment (losing coverage / on COBRA) that's most time-sensitive to get to
+  an agent fast.
+- **Removed `current_premium`** ("What are you currently paying per
+  month?"). Unlike the fields above, this one *was* wired to a CRM field
+  (`current_premium_range`, §6) — that field will go empty going forward.
+  It was never part of `leadScoring.js`, though: only *whether* someone is
+  currently insured feeds the score (`current_coverage != none`), not what
+  they pay. Cut by explicit request to prioritize step count over that one
+  CRM field.
+- **Removed `ongoing_medication`** ("Are these regular, ongoing
+  prescriptions?"), the yes/no follow-up to `takes_medication`. Also never
+  included in the submit payload — `takesMedication` alone was already
+  being sent — so this was pure friction with no data loss. `healthcare_usage`
+  and `takes_medication` themselves stay; only this one follow-up is gone.
 
-Together these cut 2–3 steps off every completion (3 for multi-person
-households), on top of the steps that were already conditional.
+Together these cut 5–6 steps off every completion (6 for multi-person
+households losing coverage or on COBRA who take regular medication), on
+top of the steps that were already conditional.
 
 ## 3. Conditional logic map
 
 Implemented as `showIf(answers)` predicates in `quizConfig.js`:
 
 - `current_coverage = marketplace` → show `aca_subsidy`.
-- `primary_need = losing_coverage` OR `current_coverage = cobra` → show `coverage_end_date`.
-- `current_coverage = none` → show `uninsured_duration`; skip `current_premium`.
-- `current_coverage != none` → show `current_premium`.
-- `takes_medication = yes` → show `ongoing_medication`.
+- `current_coverage = none` → show `uninsured_duration`.
 - `healthcare_usage = ongoing` (or any eligibility signal) → would route through
   the eligibility question block once it's enabled — see below.
 
@@ -162,12 +176,12 @@ this is the contract a real `/api/leads` endpoint should accept):
   contact: { firstName, lastName, email },
   phone: "5555550123",
   otpVerified: true,
+  dob: "1990-06-18",
   zip: "78701",
   state: "TX",                 // derived, approximate — see zipToState.js
   household: "family",
   dependentAges: [],           // always empty now — see §2, "Step-count cuts"
   currentCoverage: "marketplace",
-  currentPremium: "500_750",
   targetBudget: "400_700",
   coverageStart: "asap",
   healthcareUsage: "few_per_year",
@@ -198,12 +212,12 @@ Not included above but tracked separately: funnel abandonment step (via
 | `zip` / `state` | Contact: Postal Code / State | standard |
 | `household` | Custom field: `household_composition` | picklist matching quiz values |
 | `dependentAges` | Custom field: `dependent_ages` (text, comma-joined) | always empty now — kept in the payload shape in case per-dependent detail is wanted again later; `household` carries the real signal |
+| `dob` | Contact: Date of Birth | standard; replaces the old plain-integer `age` field for the Guided flow (Fast Track already sent this) |
 | `currentCoverage` | Custom field: `current_coverage_type` | picklist |
-| `currentPremium` | Custom field: `current_premium_range` | picklist |
 | `targetBudget` | Custom field: `target_budget_range` | picklist |
 | `coverageStart` | Custom field: `coverage_start_timeframe` | picklist |
 | `healthcareUsage` | Custom field: `healthcare_usage` | picklist |
-| `takesMedication` / `ongoingMedication` | Custom field: `medication_status` | picklist |
+| `takesMedication` | Custom field: `medication_status` | picklist; `ongoingMedication` follow-up removed (§2) — this field alone still reaches GHL |
 | `leadScore` | Custom field: `lead_score` (number) | internal only — no consumer-facing surface in GHL either |
 | `leadTier` | Tag: `tier:hot` / `tier:warm` / `tier:nurture` | tags drive GHL workflow triggers |
 | `routing` | Tag: `route:standard` / `route:alt-coverage` | drives which pipeline/workflow picks it up |
