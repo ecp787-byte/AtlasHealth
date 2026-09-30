@@ -38,6 +38,8 @@ app.get('/health', (_req, res) => res.json({
     accessToken: !!process.env.META_CAPI_ACCESS_TOKEN,
   },
   trustedFormRetainConfigured: !!process.env.TRUSTEDFORM_API_KEY,
+  leadProsperLookupConfigured: !!process.env.LP_API_TOKEN,
+  resendConfigured: !!process.env.RESEND_API_KEY,
   adminApiConfigured: !!process.env.ADMIN_API_KEY,
 }));
 app.use('/api/otp', otpRoutes);
@@ -81,6 +83,8 @@ app.listen(PORT, () => {
   );
   // eslint-disable-next-line no-console
   console.log('[env check] TRUSTEDFORM_API_KEY set:', !!process.env.TRUSTEDFORM_API_KEY);
+  // eslint-disable-next-line no-console
+  console.log('[env check] LP_API_TOKEN set:', !!process.env.LP_API_TOKEN, '| RESEND_API_KEY set:', !!process.env.RESEND_API_KEY);
   // eslint-disable-next-line no-console
   console.log('[env check] DATABASE_URL set:', !!process.env.DATABASE_URL, '| ADMIN_API_KEY set:', !!process.env.ADMIN_API_KEY);
 });
