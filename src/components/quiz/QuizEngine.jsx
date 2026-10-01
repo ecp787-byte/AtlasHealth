@@ -95,6 +95,22 @@ export default function QuizEngine({ onComplete }) {
     onComplete(finalAnswers);
   }
 
+  // The consent step's "decline" action (Twilio A2P requires SMS consent be
+  // genuinely optional — see the comment on the 'consent' step in
+  // quizConfig.js, Error 30923). Finishes immediately rather than calling
+  // goNext() + relying on 'otp' being filtered out: setAnswers() is async,
+  // so a goNext() called right after wouldn't see the updated `answers` in
+  // this render's closure yet and could land on a stale step index. Building
+  // finalAnswers directly here (not from the `answers` closure) avoids that
+  // race entirely - consent:false is guaranteed present no matter when the
+  // checkbox state last changed.
+  function declineAndFinish() {
+    const finalAnswers = { ...answers, consent: false, otpVerified: false, assessmentCompleted: true };
+    trackEvent(EVENTS.LEAD);
+    clearProgress();
+    onComplete(finalAnswers);
+  }
+
   const field = step.field;
   const value = answers[field];
   const progressBar = <ProgressBar current={safeIndex + 1} total={activeSteps.length} />;
@@ -280,6 +296,9 @@ export default function QuizEngine({ onComplete }) {
       // calling finish() directly; finish() still happens automatically
       // once OTP is the last remaining step and gets verified (goNext()
       // already finishes when there's no next step — see above).
+      // The secondaryLabel/onSecondary below is the other path: decline
+      // SMS entirely via declineAndFinish(), which submits right away
+      // without ever visiting 'otp'.
       const summary = [
         { label: 'Name', value: answers.contact ? `${answers.contact.firstName} ${answers.contact.lastName}` : '—' },
         { label: 'Phone', value: formatPhoneDisplay(answers.phone) || '—' },
@@ -295,6 +314,12 @@ export default function QuizEngine({ onComplete }) {
           continueLabel="Agree & Send Code"
           continueDisabled={!value}
           onContinue={goNext}
+          // Required so SMS consent is genuinely optional, not a condition
+          // of completing the form (Twilio A2P error 30923) - see
+          // declineAndFinish() and the comment on this step in
+          // quizConfig.js. Always enabled, regardless of checkbox state.
+          secondaryLabel="No thanks — don't text me, connect me by phone"
+          onSecondary={declineAndFinish}
         >
           <StepConsent checked={value} onChange={(v) => setField(field, v)} summary={summary} />
         </StepShell>

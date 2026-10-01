@@ -72,7 +72,15 @@ export default function ResultsPage({ answers, attribution }) {
       leadTier: tier,
       routing: routing.route,
       attribution,
-      tcpaText: CONSENT_COPY.text,
+      // Only true when the consent step's checkbox was actually checked —
+      // declineAndFinish() (QuizEngine.jsx) explicitly sets consent:false
+      // when the visitor used the "don't text me" path, so this must never
+      // default to true. Record that choice (smsConsent) regardless, and
+      // only attach the literal agreed-to text (tcpaText) when consent was
+      // actually given — sending "I agree..." for someone who declined
+      // would misrepresent what happened to Lead Prosper and any buyer.
+      smsConsent: !!answers.consent,
+      ...(answers.consent ? { tcpaText: CONSENT_COPY.text } : {}),
       trustedFormCertUrl: getTrustedFormCertUrl(),
       submittedAt: new Date().toISOString(),
     }).then((result) => {

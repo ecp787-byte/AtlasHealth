@@ -232,11 +232,19 @@ export const QUIZ_STEPS = [
   // a paperwork one, and is what got the Twilio campaign rejected (Error
   // 30896: opt-in doesn't show consent before messaging). Do not move this
   // back below 'otp'.
+  //
+  // Also note: the checkbox here is NOT required to continue (see
+  // QuizEngine.jsx's secondaryLabel/onSecondary on this step) — Twilio
+  // separately rejected the campaign a second time (Error 30923, "Forced
+  // Consent Violation") for making SMS consent a condition of completing
+  // the form. A2P review requires a real, visible way to decline SMS and
+  // still finish/use the service - that's declineAndFinish() in
+  // QuizEngine.jsx, which skips 'otp' entirely and submits unverified.
   {
     id: 'consent',
     type: STEP_TYPES.CONSENT,
     question: "Before we text you a verification code",
-    helper: 'Please confirm below, then we’ll send the code.',
+    helper: "This is optional. If you'd rather not be texted, you can decline below and we'll still connect you with a licensed agent by phone.",
     field: 'consent',
   },
   {
@@ -245,6 +253,10 @@ export const QUIZ_STEPS = [
     question: 'Enter the 6-digit code we just sent you',
     helper: "We'll use this number to securely verify your request and connect you with a licensed agent who can review available options.",
     field: 'otpVerified',
+    // Skipped entirely when the consent step was declined (see above) -
+    // never sent a text without consent, and never shown a "verify this
+    // code" screen for a code that (correctly) was never sent.
+    showIf: (answers) => answers.consent !== false,
   },
 ];
 
@@ -323,12 +335,13 @@ export const FAST_TRACK_STEPS = [
     helper: "Next, we'll ask you to confirm you're okay being texted before we send a verification code.",
     field: 'phone',
   },
-  // See the identical comment in QUIZ_STEPS above — must stay before 'otp'.
+  // See the identical comment in QUIZ_STEPS above — must stay before 'otp',
+  // and the checkbox is optional there for the same Error 30923 reason.
   {
     id: 'consent',
     type: STEP_TYPES.CONSENT,
     question: "Before we text you a verification code",
-    helper: 'Please confirm below, then we’ll send the code.',
+    helper: "This is optional. If you'd rather not be texted, you can decline below and we'll still connect you with a licensed agent by phone.",
     field: 'consent',
   },
   {
@@ -337,6 +350,7 @@ export const FAST_TRACK_STEPS = [
     question: 'Enter the 6-digit code we just sent you',
     helper: "We'll use this number to securely verify your request and connect you with a licensed agent who can review available options.",
     field: 'otpVerified',
+    showIf: (answers) => answers.consent !== false,
   },
 ];
 

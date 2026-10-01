@@ -16,6 +16,13 @@ export default function StepShell({
   continueLabel = 'Continue',
   continueDisabled,
   onContinue,
+  // Optional second, lower-emphasis action below the primary button — used
+  // by the consent step for its required "decline and still continue"
+  // path (Twilio A2P error 30923: SMS consent must be optional, with a
+  // visible way to proceed without it — see quizConfig.js/QuizEngine.jsx).
+  // Not used by any other step today.
+  secondaryLabel,
+  onSecondary,
 }) {
   return (
     <div className="quiz-step">
@@ -46,6 +53,15 @@ export default function StepShell({
           >
             {continueLabel}
           </button>
+          {secondaryLabel && onSecondary && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-block quiz-secondary-action"
+              onClick={onSecondary}
+            >
+              {secondaryLabel}
+            </button>
+          )}
         </div>
       )}
     </div>

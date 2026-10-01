@@ -163,8 +163,16 @@ input,select{font-family:inherit;font-size:16px;}
 .quiz-cta-bar{
   position:sticky;bottom:0;padding:14px 20px calc(14px + env(safe-area-inset-bottom));
   background:linear-gradient(to top, var(--bg) 60%, transparent);
+  display:flex;flex-direction:column;gap:8px;
 }
 .quiz-cta-bar .btn{max-width:560px;margin-inline:auto;display:flex;}
+/* The consent step's "decline and continue anyway" action (see
+   StepShell.jsx secondaryLabel/onSecondary) — deliberately quieter than
+   the primary button so agreeing still reads as the default path, while
+   staying genuinely visible and tappable per Twilio's requirement that
+   declining SMS consent must be a clear, real option, not a required one. */
+.quiz-secondary-action{font-size:14px;padding:10px;border-color:transparent;}
+.quiz-secondary-action:hover{border-color:var(--line-strong);}
 
 /* Cards — large, fully tappable, never a dropdown */
 .quiz-cards{display:flex;flex-direction:column;gap:10px;}
