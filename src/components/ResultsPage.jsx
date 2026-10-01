@@ -4,7 +4,7 @@ import { scoreLead } from '../lib/leadScoring.js';
 import { getEligibilityRoute } from '../lib/leadRouting.js';
 import { trackEvent, EVENTS } from '../lib/tracking.js';
 import { submitLead, bookAppointment } from '../lib/api.js';
-import { AGENT_SMS_HREF, AGENT_PHONE_DISPLAY } from '../data/legalContent.js';
+import { AGENT_SMS_HREF, AGENT_PHONE_DISPLAY, AGENT_PHONE_TEL } from '../data/legalContent.js';
 import { CONSENT_COPY } from './quiz/StepConsent.jsx';
 import { getTrustedFormCertUrl } from '../lib/trustedForm.js';
 
@@ -45,13 +45,32 @@ export default function ResultsPage({ answers, attribution }) {
   const { score, tier } = useMemo(() => scoreLead(answers), [answers]);
   const routing = useMemo(() => getEligibilityRoute(answers), [answers]);
   const firstName = answers.contact?.firstName || 'there';
+  // declineAndFinish() (QuizEngine.jsx) is the only path that sets
+  // consent to the literal boolean false (everyone who completes the
+  // normal path has consent:true, since the primary CTA on that step is
+  // disabled until the box is checked). We use that to recognize the
+  // "don't text me" exit and skip selling the lead below — see the
+  // comment on the effect for why.
+  const declined = answers.consent === false;
 
-  // Submit once, on mount. Fire-and-forget from the UI's perspective —
-  // submitLead() (src/lib/api.js) never throws and a failed/slow backend
-  // (e.g. Render's free tier waking from idle) doesn't block this page from
-  // rendering; it just gets logged as a warning. The leadId from the
-  // response is captured into state once it arrives, for confirmSchedule().
+  // Submit once, on mount — but ONLY when the visitor didn't decline SMS
+  // consent. We never got an OTP-verified phone number for a decline, so
+  // we have no way to confirm the number is real; selling/sharing an
+  // unverified number is exactly the bad-data problem we're avoiding.
+  // Compliance-wise this is fine: Twilio's requirement (Error 30923) is
+  // that declining consent must not block someone from *completing the
+  // funnel and getting help* — it says nothing about whether we choose
+  // to sell that submission. The UI below still gives decliners a real,
+  // honest way to reach an agent (calling in themselves), so the funnel
+  // is still "complete" for them even though nothing gets sold.
+  //
+  // Fire-and-forget from the UI's perspective — submitLead() (src/lib/api.js)
+  // never throws and a failed/slow backend (e.g. Render's free tier waking
+  // from idle) doesn't block this page from rendering; it just gets logged
+  // as a warning. The leadId from the response is captured into state once
+  // it arrives, for confirmSchedule().
   useEffect(() => {
+    if (declined) return;
     submitLead({
       contact: answers.contact,
       phone: answers.phone,
@@ -72,13 +91,9 @@ export default function ResultsPage({ answers, attribution }) {
       leadTier: tier,
       routing: routing.route,
       attribution,
-      // Only true when the consent step's checkbox was actually checked —
-      // declineAndFinish() (QuizEngine.jsx) explicitly sets consent:false
-      // when the visitor used the "don't text me" path, so this must never
-      // default to true. Record that choice (smsConsent) regardless, and
-      // only attach the literal agreed-to text (tcpaText) when consent was
-      // actually given — sending "I agree..." for someone who declined
-      // would misrepresent what happened to Lead Prosper and any buyer.
+      // Always true here (the declined path returns above before this
+      // runs), but kept explicit rather than hardcoded true in case this
+      // function is ever reused for a path that isn't fully gated above.
       smsConsent: !!answers.consent,
       ...(answers.consent ? { tcpaText: CONSENT_COPY.text } : {}),
       trustedFormCertUrl: getTrustedFormCertUrl(),
@@ -98,6 +113,33 @@ export default function ResultsPage({ answers, attribution }) {
     // resolves; a failure here only means the buyer/lead calendar invite
     // doesn't go out (logged server-side), not that the booking is lost.
     bookAppointment(leadId, { date: schedDate, slot: schedSlot });
+  }
+
+  // No submission happened for a decline (see the effect above) — a
+  // scheduling box, booking confirmation, or "we'll call you" promise
+  // here would all be lies, since nothing was sent anywhere. This screen
+  // is the honest version: the funnel still "completes" (satisfying
+  // Twilio's requirement that declining consent can't block someone from
+  // finishing and getting help), but it's a self-service call-in, not a
+  // promise that an agent will reach out.
+  if (declined) {
+    return (
+      <div className="results-page">
+        <div className="results-check" aria-hidden="true">✓</div>
+        <h1 className="results-title">Thanks, {firstName}</h1>
+        <p className="results-subtitle">
+          Since we weren't able to verify your number, we're not able to automatically match
+          you with an agent — but you can still get your questions answered right now.
+        </p>
+        <a className="btn btn-primary btn-block results-cta" href={AGENT_PHONE_TEL}>
+          Call Us Now — {AGENT_PHONE_DISPLAY}
+        </a>
+        <p className="results-footnote">
+          No plan recommendations or pricing are shown here; a licensed agent reviews real,
+          current plan options with you directly.
+        </p>
+      </div>
+    );
   }
 
   return (
