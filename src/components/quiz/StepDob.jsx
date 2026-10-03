@@ -65,7 +65,7 @@ export default function StepDob({ value, onChange, autoFocus }) {
         autoComplete="bday"
         autoFocus={autoFocus}
         maxLength={10}
-        className="quiz-input quiz-input-large"
+        className="quiz-input quiz-input-large quiz-input-dob"
         placeholder="MM/DD/YYYY"
         value={digits ? digitsToDisplay(digits) : isoToDisplay(value)}
         onChange={(e) => handleChange(e.target.value)}
