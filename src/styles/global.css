@@ -174,6 +174,18 @@ input,select{font-family:inherit;font-size:16px;}
 .quiz-secondary-action{font-size:14px;padding:10px;border-color:transparent;}
 .quiz-secondary-action:hover{border-color:var(--line-strong);}
 
+/* Present on every quiz step, not just the consent step - see the comment
+   on StepShell.jsx for why (Twilio's /otp-landing?start=1 review entry
+   point skips the landing page's footer entirely, so this is the only
+   place these links are reachable without clicking deep into the funnel
+   first). Deliberately small and quiet - informational, not a CTA. */
+.quiz-legal-footer{
+  display:flex;justify-content:center;align-items:center;gap:8px;
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom));
+  font-size:11px;color:var(--text-muted);
+}
+.quiz-legal-footer a{color:var(--text-muted);text-decoration:underline;}
+
 /* Cards — large, fully tappable, never a dropdown */
 .quiz-cards{display:flex;flex-direction:column;gap:10px;}
 .quiz-cards-2col{display:grid;grid-template-columns:1fr 1fr;}
