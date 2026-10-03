@@ -211,6 +211,14 @@ input,select{font-family:inherit;font-size:16px;}
 }
 .quiz-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft);}
 .quiz-input-large{font-size:26px;text-align:center;letter-spacing:0.02em;}
+/* DOB overrides the shared center alignment above. With no value yet, a
+   centered empty text input puts the blinking caret in the middle of the
+   box - which visually lands between the two placeholder "D"s in
+   "MM/DD/YYYY", making it look like typing should start on the day instead
+   of the month. Age/Zip/Phone don't have this problem (nothing in their
+   placeholder implies a start position), so this is scoped to DOB only
+   rather than changing the shared class. */
+.quiz-input-dob{text-align:left;}
 
 .quiz-contact-fields{display:flex;flex-direction:column;gap:12px;}
 .quiz-contact-fields .quiz-input{font-size:16px;text-align:left;font-weight:500;}
