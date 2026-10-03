@@ -3,6 +3,20 @@
 // sticky bottom continue button. Steps that auto-advance (single-select
 // cards, yes/no) pass showContinue={false} so there's nothing to tap beyond
 // the choice itself - fewer taps, faster funnel, per the mobile-first spec.
+//
+// Every step also renders a small Privacy Policy / Terms & Conditions link
+// row at the very bottom (quiz-legal-footer below) - not just the consent
+// step. Twilio's A2P reviewers hit this funnel directly at
+// /otp-landing?start=1 (that's the literal URL in the campaign's message_flow
+// and in their rejection notices), which skips LandingHero/ComplianceFooter
+// entirely and drops them straight into question 1 - before this was added,
+// a reviewer landing there saw zero policy links until clicking through
+// several unrelated quiz questions to reach the consent step. Twilio's
+// Error 30923 docs list "the opt-in website lacks accessible Terms and
+// Conditions and Privacy Policy links" as one of the specific rejection
+// triggers, separate from the forced-consent issue already fixed - this is
+// what closes that gap. Keep this present on every step; don't gate it
+// behind the consent step or move it back to landing-only.
 export default function StepShell({
   question,
   helper,
@@ -64,6 +78,11 @@ export default function StepShell({
           )}
         </div>
       )}
+      <nav className="quiz-legal-footer" aria-label="Legal">
+        <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        <span aria-hidden="true">&middot;</span>
+        <a href="/terms" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>
+      </nav>
     </div>
   );
 }
