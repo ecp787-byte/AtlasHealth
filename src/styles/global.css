@@ -155,17 +155,16 @@ input,select{font-family:inherit;font-size:16px;}
 .quiz-progress-track{height:5px;border-radius:3px;background:var(--line);overflow:hidden;}
 .quiz-progress-fill{height:100%;background:var(--progress-gradient);border-radius:3px;transition:width .3s ease;}
 
-/* justify-content:flex-start, not center. Centering the question block
-   vertically inside this flex:1 area looked fine on a short phone screen
-   (where there's barely any extra room to center within), but on a tall
-   desktop browser window the empty space above/below the question scales
-   with the window's height - on a tall monitor that's hundreds of pixels
-   of dead air above the question AND a huge gap before the sticky Continue
-   button below it. Anchoring to the top keeps the question right under the
-   header at any viewport height, with the (still sticky) CTA bar simply
-   sitting lower on tall screens instead of the question floating in the
-   middle of an empty page. */
-.quiz-step-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:28px 20px 8px;max-width:560px;margin-inline:auto;width:100%;}
+/* quiz-step-center wraps quiz-step-body + quiz-cta-bar + quiz-legal-footer
+   (see the comment on StepShell.jsx) so the question, its input, the
+   Continue button and the footer are centered on screen as ONE block.
+   quiz-step-body itself no longer grows or centers on its own - it just
+   sizes to its content now, so the group stays a compact unit instead of
+   the button being pinned hundreds of pixels away from the question on a
+   tall window. */
+.quiz-step-center{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.quiz-step-body{display:flex;flex-direction:column;padding:20px 20px 8px;max-width:560px;margin-inline:auto;width:100%;}
+
 .quiz-question{font-family:var(--font-display);font-weight:800;font-size:clamp(22px,5.5vw,30px);line-height:1.22;letter-spacing:-0.01em;}
 .quiz-helper{margin-top:10px;font-size:14px;line-height:1.55;color:var(--text-muted);}
 .quiz-step-content{margin-top:24px;}
