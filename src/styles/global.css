@@ -227,7 +227,11 @@ input,select{font-family:inherit;font-size:16px;}
    of the month. Age/Zip/Phone don't have this problem (nothing in their
    placeholder implies a start position), so this is scoped to DOB only
    rather than changing the shared class. */
-.quiz-input-dob{text-align:left;}
+/* Narrower than the full-width field (which is sized for the whole
+   question column, not a 10-character date) - margin-inline:auto re-centers
+   it under the question now that it's not stretching edge to edge, since
+   its flex parent (.quiz-single-input) still has the full column's width. */
+.quiz-input-dob{text-align:left;max-width:300px;margin-inline:auto;}
 
 .quiz-contact-fields{display:flex;flex-direction:column;gap:12px;}
 .quiz-contact-fields .quiz-input{font-size:16px;text-align:left;font-weight:500;}
