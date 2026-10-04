@@ -4,6 +4,21 @@
 // cards, yes/no) pass showContinue={false} so there's nothing to tap beyond
 // the choice itself - fewer taps, faster funnel, per the mobile-first spec.
 //
+// quiz-step-body/cta-bar/legal-footer are wrapped together in
+// quiz-step-center (below quiz-step-top, which stays pinned to the very
+// top always) so the question, its input, the Continue button, and the
+// footer get centered on screen as ONE block, instead of each fighting
+// for space independently. The earlier version gave quiz-step-body its
+// own flex:1 + center, while quiz-cta-bar lived outside it pinned via
+// position:sticky to the literal bottom of the viewport - on a short
+// phone screen that's invisible (there's no slack to show), but on a
+// tall desktop browser window it meant the button sat hundreds of
+// pixels below the (separately centered) question, with a big dead gap
+// between them. Grouping them removes that gap; position:sticky on the
+// CTA bar still takes over gracefully if a step's content is ever long
+// enough to need scrolling (e.g. consent's full legal text on a short
+// screen), so nothing is lost there.
+//
 // Every step also renders a small Privacy Policy / Terms & Conditions link
 // row at the very bottom (quiz-legal-footer below) - not just the consent
 // step. Twilio's A2P reviewers hit this funnel directly at
@@ -52,37 +67,39 @@ export default function StepShell({
         </button>
         {progressBar}
       </div>
-      <div className="quiz-step-body">
-        <h1 className="quiz-question">{question}</h1>
-        {helper && <p className="quiz-helper">{helper}</p>}
-        <div className="quiz-step-content">{children}</div>
-      </div>
-      {showContinue && (
-        <div className="quiz-cta-bar">
-          <button
-            type="button"
-            className="btn btn-primary btn-block"
-            disabled={continueDisabled}
-            onClick={onContinue}
-          >
-            {continueLabel}
-          </button>
-          {secondaryLabel && onSecondary && (
+      <div className="quiz-step-center">
+        <div className="quiz-step-body">
+          <h1 className="quiz-question">{question}</h1>
+          {helper && <p className="quiz-helper">{helper}</p>}
+          <div className="quiz-step-content">{children}</div>
+        </div>
+        {showContinue && (
+          <div className="quiz-cta-bar">
             <button
               type="button"
-              className="btn btn-ghost btn-block quiz-secondary-action"
-              onClick={onSecondary}
+              className="btn btn-primary btn-block"
+              disabled={continueDisabled}
+              onClick={onContinue}
             >
-              {secondaryLabel}
+              {continueLabel}
             </button>
-          )}
-        </div>
-      )}
-      <nav className="quiz-legal-footer" aria-label="Legal">
-        <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-        <span aria-hidden="true">&middot;</span>
-        <a href="/terms" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>
-      </nav>
+            {secondaryLabel && onSecondary && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-block quiz-secondary-action"
+                onClick={onSecondary}
+              >
+                {secondaryLabel}
+              </button>
+            )}
+          </div>
+        )}
+        <nav className="quiz-legal-footer" aria-label="Legal">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="/terms" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>
+        </nav>
+      </div>
     </div>
   );
 }
