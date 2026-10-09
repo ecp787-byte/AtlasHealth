@@ -74,6 +74,36 @@ export const PRIVACY_POLICY = {
       ],
     },
     {
+      // Added for Twilio A2P 10DLC campaign vetting (Error 30896 - Opt-in
+      // Error). Twilio's reviewers check the PUBLISHED privacy policy itself
+      // for three specific disclosures - a mobile-number non-sharing
+      // statement, message frequency, and a "message and data rates may
+      // apply" notice - separately from whatever the on-page consent
+      // checkbox says (StepConsent.jsx's CONSENT_COPY has the frequency/
+      // rates language, but that's the funnel UI, not this legal page, and
+      // Twilio's checklist wants it here too). The non-sharing statement is
+      // worded narrowly and truthfully: we DO share the number, but only
+      // with the specific contracted agent(s) the visitor was matched with
+      // and explicitly agreed to in CONSENT_COPY - never sold/rented to
+      // unrelated third parties for their own independent marketing. Don't
+      // water this down to a blanket "we never share your number" claim;
+      // that would contradict "How We Share Information" above and the
+      // lead-generation model described in the Terms.
+      heading: 'Text Messaging (SMS) Program',
+      body: [
+        'If you provide your mobile phone number and agree to receive text messages, Atlas ' +
+          'Health and the licensed insurance agent(s) you are matched with (contracted with ' +
+          'Veritas Insurance Solutions) may text you about health insurance options. We do not ' +
+          'sell, rent, or share your mobile number with unrelated third parties or affiliates for ' +
+          'their own independent marketing purposes - it is shared only with the specific ' +
+          'contracted agent(s) you are matched with, for the purpose you agreed to.',
+        'Message frequency varies depending on your matched agent(s) and your own responses. ' +
+          'Message and data rates may apply.',
+        'Reply STOP at any time to stop text messages, or HELP for help. You may still receive a ' +
+          'final confirmation message after opting out.',
+      ],
+    },
+    {
       heading: 'Your Choices',
       body: [
         'Text messages: reply STOP to any text to opt out, or HELP for help. You may still receive ' +
