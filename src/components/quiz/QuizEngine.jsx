@@ -39,9 +39,35 @@ function formatPhoneDisplay(digits) {
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
 
+// Twilio's A2P campaign reviewers hit this funnel cold via a link in
+// message_flow and are not going to click through 9 unrelated qualifying
+// questions to find the SMS opt-in screen - Error 30896 rejections have
+// twice come back saying the reviewer couldn't find/verify consent being
+// collected, even though the 'consent' step (see quizConfig.js) genuinely
+// does gate the OTP send behind a real checkbox. ?review=consent on the
+// funnel URL (e.g. /otp-landing?start=1&review=consent) jumps straight to
+// that step with blank prior answers, so the review link can go straight to
+// the actual opt-in screen instead of question 1. Deliberately narrow -
+// only 'consent' is supported, not an arbitrary step id - so this can't be
+// used to land on 'otp' (which would try to text a never-collected phone
+// number) or skip required fields in a way that reaches finish() with bad
+// data. Only takes effect on a fresh visit (no saved in-progress quiz),
+// same as shouldSkipLandingIntro() in App.jsx.
+function getReviewStepIndex() {
+  if (typeof window === 'undefined') return -1;
+  const reviewParam = new URLSearchParams(window.location.search).get('review');
+  if (reviewParam !== 'consent') return -1;
+  return getActiveSteps({}).findIndex((s) => s.id === 'consent');
+}
+
 export default function QuizEngine({ onComplete }) {
   const [answers, setAnswers] = useState(() => loadProgress()?.answers || {});
-  const [stepIndex, setStepIndex] = useState(() => loadProgress()?.stepIndex || 0);
+  const [stepIndex, setStepIndex] = useState(() => {
+    const saved = loadProgress();
+    if (saved) return saved.stepIndex || 0;
+    const reviewIndex = getReviewStepIndex();
+    return reviewIndex >= 0 ? reviewIndex : 0;
+  });
   const [started, setStarted] = useState(false);
 
   const activeSteps = useMemo(() => getActiveSteps(answers), [answers]);
