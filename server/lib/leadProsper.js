@@ -81,15 +81,28 @@ function buildPayload(lead, { ip, userAgent }) {
     // Stopgap until named custom fields exist on the campaign (see header
     // comment): pack the most valuable quiz selections into the two
     // general-purpose tracking fields every Lead Prosper campaign has.
+    // 'md'/'emp' (Medicaid / employer-coverage — added when the quiz grew
+    // those two early ACA-eligibility qualifiers) and 'inc' (household
+    // income bucket) are placed early in their respective packFields() call
+    // so they're guaranteed to fit ahead of the longer-standing, lower-
+    // priority fields after them — packFields() silently stops adding once
+    // the 75-char cap would be hit, so anything pushed later risks being
+    // dropped first. Same stopgap as everything else here: swap for real
+    // named custom fields once Lead Prosper's campaign has them (see header
+    // comment) — onMedicaid/employerCoverage/monthlyIncome belong on that
+    // list too.
     lp_subid1: packFields([
       ['need', lead.primaryNeed],
       ['hh', lead.household],
+      ['md', lead.onMedicaid],
+      ['emp', lead.employerCoverage],
       ['cov', lead.currentCoverage],
       ['covstat', lead.coverageStatus],
       ['start', lead.coverageStart],
     ]),
     lp_subid2: packFields([
       ['budget', lead.targetBudget],
+      ['inc', lead.monthlyIncome],
       ['premium', lead.currentPremium],
       ['usage', lead.healthcareUsage],
       ['meds', lead.takesMedication],
