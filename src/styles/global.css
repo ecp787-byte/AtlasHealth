@@ -144,16 +144,79 @@ input,select{font-family:inherit;font-size:16px;}
   padding-top:calc(14px + env(safe-area-inset-top));
   background-image:var(--aurora-bg-soft);background-repeat:no-repeat;background-color:var(--bg);
 }
-.quiz-step-top{display:flex;align-items:center;gap:14px;padding-inline:16px;}
+/* Grid, not a single flex row: the back button sits top-left; the section
+   pill (when present — see getSectionProgress() in quizConfig.js) sits
+   top-right on the same row; the progress bar always spans the full width
+   on its own row below. ProgressBar.jsx's own wrapper is display:contents
+   so its pill/bar are placed directly by this grid instead of nesting
+   their own box. With no section (Fast Track), the pill cell is simply
+   empty and the bar still spans full width below the back button. */
+.quiz-step-top{
+  display:grid;grid-template-columns:auto 1fr;align-items:center;
+  column-gap:14px;row-gap:8px;padding-inline:16px;
+}
+.quiz-progress-group{display:contents;}
 .quiz-back{
+  grid-column:1;grid-row:1;
   flex:none;width:38px;height:38px;border-radius:50%;border:1px solid var(--line-strong);
   background:transparent;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
 }
 .quiz-back:disabled{opacity:0;pointer-events:none;}
 
-.quiz-progress{flex:1;}
+.quiz-section-pill{
+  grid-column:2;grid-row:1;justify-self:end;
+  display:inline-flex;align-items:baseline;gap:6px;padding:5px 12px;border-radius:999px;
+  background:var(--accent-3-soft);color:var(--accent-3);font-size:12px;font-weight:700;
+  letter-spacing:0.01em;white-space:nowrap;
+}
+.quiz-section-pill-count{font-weight:600;color:var(--text-muted);font-size:11px;}
+
+.quiz-progress{grid-column:1 / -1;grid-row:2;}
 .quiz-progress-track{height:5px;border-radius:3px;background:var(--line);overflow:hidden;}
 .quiz-progress-fill{height:100%;background:var(--progress-gradient);border-radius:3px;transition:width .3s ease;}
+
+/* Persistent trust strip — rendered on every step (see StepShell.jsx),
+   directly below the step's own content. Deliberately omits any star
+   rating or review-count claim: Atlas Health doesn't have a public review
+   program yet, so this only states things already said elsewhere in the
+   app (Homepage.jsx / LandingHero.jsx) rather than inventing social proof. */
+.quiz-trust-strip{margin-top:28px;padding-top:18px;border-top:1px solid var(--line);}
+.quiz-trust-badges{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;color:var(--text-muted);font-weight:600;}
+.quiz-trust-badges svg{flex:none;color:var(--accent);}
+.quiz-trust-benefits{
+  margin-top:14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:8px 18px;font-size:12.5px;color:var(--text);font-weight:600;
+}
+.quiz-trust-benefits li{display:flex;align-items:center;gap:6px;}
+.quiz-trust-benefits li::before{
+  content:'';flex:none;width:14px;height:14px;border-radius:50%;background:var(--accent-soft);
+  box-shadow:inset 0 0 0 1.5px var(--accent);
+}
+
+/* Income slider — single-thumb <input type="range"> over discrete buckets
+   (see StepIncomeSlider.jsx), styled to look like a custom dot-on-track
+   rather than a bare system slider. --quiz-income-pct is set inline per
+   render so the thumb's own color stop lines up with its position without
+   a second absolutely-positioned element to keep in sync. */
+.quiz-income-slider{padding-top:4px;}
+.quiz-income-value{text-align:center;font-weight:700;font-size:17px;margin-bottom:18px;}
+.quiz-income-track-wrap{padding-inline:4px;}
+.quiz-income-range{
+  -webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;
+  background:linear-gradient(to right, var(--accent) var(--quiz-income-pct, 0%), var(--line) var(--quiz-income-pct, 0%));
+  outline:none;cursor:pointer;
+}
+.quiz-income-range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--accent);box-shadow:0 4px 10px -4px rgba(20,32,58,0.35);cursor:grab;
+}
+.quiz-income-range::-moz-range-thumb{
+  width:28px;height:28px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);
+  box-shadow:0 4px 10px -4px rgba(20,32,58,0.35);cursor:grab;
+}
+.quiz-income-endpoints{display:flex;justify-content:space-between;gap:12px;margin-top:10px;font-size:11.5px;color:var(--text-muted);font-weight:600;}
+
+.quiz-zip-state{margin-top:14px;text-align:center;font-size:13.5px;color:var(--text-muted);}
 
 /* quiz-step-center wraps quiz-step-body + quiz-cta-bar + quiz-legal-footer
    (see the comment on StepShell.jsx) so the question, its input, the

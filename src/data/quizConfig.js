@@ -32,6 +32,26 @@ export const STEP_TYPES = {
   PHONE: 'phone',
   OTP: 'otp',
   CONSENT: 'consent',
+  INCOME_SLIDER: 'income-slider',
+};
+
+// --------------------------------------------------------------------------
+// SECTIONS (Guided Match only — see each step's `section` below)
+// --------------------------------------------------------------------------
+// Groups steps into named phases for the progress UI: a pill reading
+// "{label} {n} of {count in this section}" plus an overall progress bar that
+// never resets, same two-layer pattern as competitor funnels we benchmarked
+// against (grouped sections read as shorter/less daunting than one flat "4
+// of 17", while the underlying bar still shows true total progress). Purely
+// presentational — SECTION_ORDER/SECTION_LABELS below, consumed by
+// QuizEngine.jsx's progress calculation. Steps with no `section` (currently:
+// none in QUIZ_STEPS, all of FAST_TRACK_STEPS) fall back to an unlabeled
+// single-counter progress bar, so Fast Track is unaffected by this.
+// --------------------------------------------------------------------------
+export const SECTION_LABELS = {
+  about_you: 'About you',
+  your_situation: 'Your situation',
+  your_match: 'Your match',
 };
 
 // --------------------------------------------------------------------------
@@ -119,17 +139,32 @@ export const COVERAGE_STATUS_OPTIONS = [
   { value: 'uninsured', label: 'No, I’m uninsured' },
 ];
 
+// Household monthly income, as a single-thumb slider over discrete buckets
+// (not a free-text number) — asks for a realistic range without demanding
+// a precise figure nobody has memorized. Distinct from `target_budget`
+// below: this is what a household actually brings in (relevant to ACA
+// subsidy eligibility, which scales with income), where target_budget is
+// what someone would like to spend on a premium. Six buckets span roughly
+// $0–$10,000+/mo in ~$1,700 steps; `min`/`max` are used for the live label,
+// `value` is what's actually stored on the lead.
+export const INCOME_BUCKETS = [
+  { value: 'under_2500', min: 0, max: 2500, label: 'Under $2,500 a month' },
+  { value: '2500_4170', min: 2500, max: 4170, label: '$2,500 to $4,170 a month' },
+  { value: '4170_6250', min: 4170, max: 6250, label: '$4,170 to $6,250 a month' },
+  { value: '6250_8330', min: 6250, max: 8330, label: '$6,250 to $8,330 a month' },
+  { value: '8330_10420', min: 8330, max: 10420, label: '$8,330 to $10,420 a month' },
+  { value: 'over_10420', min: 10420, max: null, label: '$10,420 or more a month' },
+];
+
 export const QUIZ_STEPS = [
-  {
-    id: 'primary_need',
-    type: STEP_TYPES.CARDS,
-    question: 'What are you primarily looking for?',
-    field: 'primaryNeed',
-    options: PRIMARY_NEED_OPTIONS,
-  },
+  // --- About you -----------------------------------------------------------
+  // Who/age/ZIP first, before anything situational — coarse, fast-to-answer
+  // questions that make the next section feel personalized ("plans in your
+  // ZIP") rather than a cold start. See SECTION_LABELS above.
   {
     id: 'household',
     type: STEP_TYPES.CARDS,
+    section: 'about_you',
     question: 'Who needs coverage?',
     field: 'household',
     options: HOUSEHOLD_OPTIONS,
@@ -137,13 +172,56 @@ export const QUIZ_STEPS = [
   {
     id: 'dob',
     type: STEP_TYPES.DOB,
+    section: 'about_you',
     question: 'What is your date of birth?',
     helper: 'This helps us match you to plans you actually qualify for.',
     field: 'dob',
   },
   {
+    id: 'zip',
+    type: STEP_TYPES.ZIP,
+    section: 'about_you',
+    question: 'What is your ZIP code?',
+    helper: 'Plans and prices change with your ZIP, so we start there.',
+    field: 'zip',
+  },
+  // --- Your situation --------------------------------------------------
+  {
+    id: 'primary_need',
+    type: STEP_TYPES.CARDS,
+    section: 'your_situation',
+    question: 'Why are you looking for coverage?',
+    field: 'primaryNeed',
+    options: PRIMARY_NEED_OPTIONS,
+  },
+  // Medicaid and employer-coverage are asked as their own yes/no screens,
+  // ahead of the detailed current_coverage breakdown below, rather than only
+  // as two of its seven options. Both matter for ACA Marketplace eligibility
+  // specifically (Medicaid enrollees and employer-plan holders generally
+  // aren't Marketplace-subsidy candidates) — surfacing them this early lets
+  // a licensed agent route the call correctly before the rest of the
+  // assessment even runs, the same way current_coverage/aca_subsidy already
+  // branch the flow. Neither disqualifies or skips any step here — routing
+  // on the answer is for the agent/CRM side, not this funnel — they're
+  // additional scoring/routing signals like everything else in this file.
+  {
+    id: 'on_medicaid',
+    type: STEP_TYPES.YES_NO,
+    section: 'your_situation',
+    question: 'Are you on Medicaid right now?',
+    field: 'onMedicaid',
+  },
+  {
+    id: 'employer_coverage',
+    type: STEP_TYPES.YES_NO,
+    section: 'your_situation',
+    question: 'Do you have coverage through work?',
+    field: 'employerCoverage',
+  },
+  {
     id: 'current_coverage',
     type: STEP_TYPES.CARDS,
+    section: 'your_situation',
     question: 'What type of coverage do you currently have?',
     field: 'currentCoverage',
     options: [
@@ -159,6 +237,7 @@ export const QUIZ_STEPS = [
   {
     id: 'aca_subsidy',
     type: STEP_TYPES.YES_NO,
+    section: 'your_situation',
     question: 'Do you currently receive a premium tax credit (subsidy) on your Marketplace plan?',
     helper: "This affects what you'd actually pay for alternative coverage — no wrong answer here.",
     field: 'acaSubsidy',
@@ -167,6 +246,7 @@ export const QUIZ_STEPS = [
   {
     id: 'uninsured_duration',
     type: STEP_TYPES.CARDS,
+    section: 'your_situation',
     question: 'About how long have you been without coverage?',
     field: 'uninsuredDuration',
     options: [
@@ -178,8 +258,17 @@ export const QUIZ_STEPS = [
     showIf: (a) => a.currentCoverage === 'none',
   },
   {
+    id: 'household_income',
+    type: STEP_TYPES.INCOME_SLIDER,
+    section: 'your_situation',
+    question: "What's your approximate monthly household income?",
+    helper: 'Move the dot to your monthly range.',
+    field: 'monthlyIncome',
+  },
+  {
     id: 'target_budget',
     type: STEP_TYPES.CARDS,
+    section: 'your_situation',
     question: 'What would you ideally like to spend per month?',
     helper: 'Ranges shown are scaled to the household size you selected.',
     field: 'targetBudget',
@@ -191,6 +280,7 @@ export const QUIZ_STEPS = [
   {
     id: 'coverage_start',
     type: STEP_TYPES.CARDS,
+    section: 'your_situation',
     question: 'When would you like your new coverage to begin?',
     field: 'coverageStart',
     options: COVERAGE_START_OPTIONS,
@@ -198,6 +288,7 @@ export const QUIZ_STEPS = [
   {
     id: 'healthcare_usage',
     type: STEP_TYPES.CARDS,
+    section: 'your_situation',
     question: 'How often do you typically use healthcare?',
     field: 'healthcareUsage',
     options: [
@@ -210,17 +301,21 @@ export const QUIZ_STEPS = [
   {
     id: 'takes_medication',
     type: STEP_TYPES.YES_NO,
+    section: 'your_situation',
     question: 'Do you currently take prescription medications?',
     field: 'takesMedication',
   },
   // Eligibility/underwriting questions (disabled by default — see above).
   ...eligibilityEnabledSteps(),
-  // Name, phone, email, and ZIP collected together on one screen instead of
-  // three separate steps — see StepContactInfo.jsx. Phone is still verified
-  // by OTP immediately afterward, per spec.
+  // Name, phone, and email collected together on one screen instead of three
+  // separate steps — see StepContactInfo.jsx. ZIP is no longer asked here;
+  // it moved up to the 'zip' step in "About you" above, so this screen only
+  // merges the three fields that still have nowhere earlier to live. Phone
+  // is still verified by OTP immediately afterward, per spec.
   {
     id: 'contact_info',
     type: STEP_TYPES.CONTACT_INFO,
+    section: 'your_match',
     question: "Almost done — where should we send your options?",
     helper: "Next, we'll ask you to confirm you're okay being texted before we send a verification code.",
   },
@@ -243,6 +338,7 @@ export const QUIZ_STEPS = [
   {
     id: 'consent',
     type: STEP_TYPES.CONSENT,
+    section: 'your_match',
     question: "Before we text you a verification code",
     helper: "This is optional. If you'd rather not be texted, you can decline below and we'll still connect you with a licensed agent by phone.",
     field: 'consent',
@@ -250,6 +346,7 @@ export const QUIZ_STEPS = [
   {
     id: 'otp',
     type: STEP_TYPES.OTP,
+    section: 'your_match',
     question: 'Enter the 6-digit code we just sent you',
     helper: "We'll use this number to securely verify your request and connect you with a licensed agent who can review available options.",
     field: 'otpVerified',
@@ -384,4 +481,27 @@ export function getTargetBudgetOptions(answers) {
 export function getActiveSteps(answers) {
   const baseSteps = FUNNEL_VARIANT === 'fast_track' ? FAST_TRACK_STEPS : QUIZ_STEPS;
   return baseSteps.filter((step) => !step.showIf || step.showIf(answers));
+}
+
+// Resolve the progress-pill info for the step at `index` within
+// `activeSteps`: which named section it's in, its 1-based position within
+// that section's run of active steps, and how many active steps that
+// section has in total. Returns null when the step has no `section` (Fast
+// Track today — getActiveSteps() filters FAST_TRACK_STEPS, none of which
+// set `section`), so ProgressBar falls back to its plain "no pill" look
+// rather than showing a broken/empty label. Section membership is read off
+// each active step as encountered, so a showIf-skipped step (e.g.
+// aca_subsidy when currentCoverage isn't 'marketplace') never counts toward
+// its section's total — the pill always matches what the user actually saw.
+export function getSectionProgress(activeSteps, index) {
+  const step = activeSteps[index];
+  if (!step?.section) return null;
+  let position = 0;
+  let total = 0;
+  activeSteps.forEach((s, i) => {
+    if (s.section !== step.section) return;
+    total += 1;
+    if (i <= index) position = total;
+  });
+  return { key: step.section, label: SECTION_LABELS[step.section] || step.section, position, total };
 }

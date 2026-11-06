@@ -32,6 +32,32 @@
 // triggers, separate from the forced-consent issue already fixed - this is
 // what closes that gap. Keep this present on every step; don't gate it
 // behind the consent step or move it back to landing-only.
+// Persistent trust strip, rendered on every step (benchmarked against a
+// competitor funnel that repeats its trust signals on every screen rather
+// than only on the landing page). Deliberately carries ONLY claims already
+// made elsewhere in this app (Homepage.jsx, LandingHero.jsx) — no star
+// rating or review count, since Atlas Health doesn't have a real,
+// citable review program to back one. Add one here only once there's an
+// actual, verifiable source for it (e.g. a real Trustpilot/Google rating) —
+// never a placeholder number.
+function TrustStrip() {
+  return (
+    <div className="quiz-trust-strip">
+      <p className="quiz-trust-badges">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 2l2.9 6.26L22 9.27l-5 4.73L18.2 21 12 17.27 5.8 21 7 14l-5-4.73 7.1-1.01L12 2z" fill="currentColor" />
+        </svg>
+        Licensed in all 50 states
+      </p>
+      <ul className="quiz-trust-benefits">
+        <li>Free coverage review</li>
+        <li>No obligation to enroll</li>
+        <li>Your info stays private</li>
+      </ul>
+    </div>
+  );
+}
+
 export default function StepShell({
   question,
   helper,
@@ -72,6 +98,7 @@ export default function StepShell({
           <h1 className="quiz-question">{question}</h1>
           {helper && <p className="quiz-helper">{helper}</p>}
           <div className="quiz-step-content">{children}</div>
+          <TrustStrip />
         </div>
         {showContinue && (
           <div className="quiz-cta-bar">

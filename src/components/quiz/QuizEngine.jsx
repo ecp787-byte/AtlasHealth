@@ -3,6 +3,7 @@ import {
   STEP_TYPES,
   getActiveSteps,
   getTargetBudgetOptions,
+  getSectionProgress,
 } from '../../data/quizConfig.js';
 import { saveProgress, loadProgress, clearProgress } from '../../lib/progress.js';
 import { trackEvent, EVENTS } from '../../lib/tracking.js';
@@ -18,6 +19,7 @@ import { isValidZip } from '../../lib/zipToState.js';
 import StepContact, { contactValid } from './StepContact.jsx';
 import StepPhone, { isValidPhone } from './StepPhone.jsx';
 import StepContactInfo, { contactInfoValid } from './StepContactInfo.jsx';
+import StepIncomeSlider from './StepIncomeSlider.jsx';
 import StepOtp from './StepOtp.jsx';
 import StepConsent from './StepConsent.jsx';
 
@@ -139,7 +141,10 @@ export default function QuizEngine({ onComplete }) {
 
   const field = step.field;
   const value = answers[field];
-  const progressBar = <ProgressBar current={safeIndex + 1} total={activeSteps.length} />;
+  const section = getSectionProgress(activeSteps, safeIndex);
+  const progressBar = (
+    <ProgressBar current={safeIndex + 1} total={activeSteps.length} section={section} />
+  );
 
   const shellCommon = {
     question: step.question,
@@ -281,7 +286,7 @@ export default function QuizEngine({ onComplete }) {
         <StepShell
           {...shellCommon}
           showContinue
-          continueDisabled={!contactInfoValid({ contact: answers.contact, phone: answers.phone, zip: answers.zip })}
+          continueDisabled={!contactInfoValid({ contact: answers.contact, phone: answers.phone })}
           continueLabel="Send code"
           onContinue={() => {
             trackEvent(EVENTS.PHONE_SUBMITTED);
@@ -291,11 +296,21 @@ export default function QuizEngine({ onComplete }) {
           <StepContactInfo
             contact={answers.contact}
             phone={answers.phone}
-            zip={answers.zip}
             onChangeContact={(v) => setField('contact', v)}
             onChangePhone={(v) => setField('phone', v)}
-            onChangeZip={(v) => setField('zip', v)}
           />
+        </StepShell>
+      );
+
+    case STEP_TYPES.INCOME_SLIDER:
+      return (
+        <StepShell
+          {...shellCommon}
+          showContinue
+          continueDisabled={!value}
+          onContinue={goNext}
+        >
+          <StepIncomeSlider value={value} onChange={(v) => setField(field, v)} />
         </StepShell>
       );
 
